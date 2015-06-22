@@ -15,6 +15,11 @@ function Level()
 	if(getQueryField("player") == 3)
 		this.levelMap = level3;
 
+
+	/**
+	 * Initialize level and graphics, called after
+	 * adding the level layer to the game engine.
+	 */
 	this.setup = function()
 	{
 		this.bombImage = new Image();
@@ -31,11 +36,110 @@ function Level()
 
 			this.game.setSize(bounds.width, bounds.height);
 		}
+
+		this.solve();
 	}
 
 
 	this.update = function(input)
 	{
+	}
+
+
+	/**
+	 *
+	 */
+	this.findStartPosition = function(level)
+	{
+		var position = {x: 1, y: 1};
+
+		for(var i = 0; i < level.length; i++) {
+			for(var j = 0; j < level[0].length; j++) {
+				if (level[i][j] == 3){
+					position.x = j;
+					position.y = i;
+				}
+			}
+		}
+
+		return position;
+	}
+
+
+	/**
+	 * Returns a copy of the level
+	 */
+	this.copyLevel = function(level)
+	{
+		var copy = [[0]];
+
+		for(var i = 0; i < level.length; i++) {
+			copy[i] = [];
+
+			for(var j = 0; j < level[i].length; j++)
+				copy[i][j] = level[i][j];
+		}
+
+		return copy;
+	}
+
+
+	this.findNextMove = function(level, position)
+	{
+		if(level[position.y][position.x - 1] == 0 && level[position.y][position.x - 2] == 0)
+			return { x: position.x - 2, y: position.y };
+
+		if(level[position.y][position.x + 1] == 0 && level[position.y][position.x + 2] == 0)
+			return { x: position.x + 2, y: position.y };
+
+		if(level[position.y - 1][position.x] == 0 && level[position.y - 2][position.x] == 0)
+			return { x: position.x, y: position.y - 2 };
+
+		if(level[position.y + 1][position.x] == 0 && level[position.y + 2][position.x] == 0)
+			return { x: position.x, y: position.y + 2 };
+
+		return false;
+	}
+
+
+	/**
+	 * Solve level, finding a way to the goal
+	 */
+	this.solve = function()
+	{
+		// 27 * 2 = 55, 1
+		var scratch = this.copyLevel(this.levelMap);
+		var pos = this.findStartPosition(this.levelMap);
+
+		scratch[pos.y][pos.x] = 1;
+
+		var stack = new Array();
+		stack.push(pos);
+
+		for(var i = 0; i < 999; i++) {
+			var move = this.findNextMove(scratch, pos);
+
+			if(move) {
+				scratch[pos.y][pos.x] = 9;
+				pos = move;
+				stack.push(move);
+
+			} else {
+				scratch[pos.y][pos.x] = 10;
+				pos = stack.pop();
+			}
+
+			console.log(pos);
+			if(pos.x == 53 && pos.y == 1)
+				break;
+		}
+
+		while(stack.length > 0) {
+			var pos = stack.pop();
+			scratch[pos.y][pos.x] = 11;
+		}
+
+		this.solution = scratch;
 	}
 
 
@@ -46,23 +150,27 @@ function Level()
 	{
 		for(var i = 0; i < this.levelMap.length; i++) {
 			for(var j = 0; j < this.levelMap[0].length; j++) {
-				if(j % 2 == 0){
+
+				// Determine horizontal width
+				if(j % 2 == 0) {
 					x = j*(widthspace+widthwall)/2;
 					w = widthwall;
-				}
-				else{
+				} else {
 					x = (j-1)*(widthspace+widthwall)/2 + widthwall;
 					w = widthspace;
 				}
-				if(i % 2 == 0){
+
+				// Determine vertical width
+				if(i % 2 == 0) {
 					y = i*(widthspace+widthwall)/2;
 					h = widthwall;
-				}
-				else{
+				} else {
 					y = (i-1)*(widthspace+widthwall)/2 + widthwall;
 					h = widthspace;
 				}
 
+				// Blank out square, some browsers paint
+				// background black in fullscreen mode
 				context.fillStyle = '#FFFFFF';
 				context.fillRect(x, y, w, h);
 
@@ -73,6 +181,16 @@ function Level()
 
 				if (this.levelMap[i][j] == 2){
 					context.drawImage(this.bombImage, x, y, w, h);
+				}
+
+				if(this.solution[i][j] == 10) {
+					context.fillStyle = "#FFEEEE";
+					context.fillRect(x, y, w, h);
+				}
+
+				if(this.solution[i][j] == 11) {
+					context.fillStyle = "#EEFFEE";
+					context.fillRect(x, y, w, h);
 				}
 			}
 		}
