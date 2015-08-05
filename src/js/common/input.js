@@ -141,9 +141,19 @@ function Mouse(canvas)
 		event.preventDefault();
 	};
 
+	this.touchstart = function(event) {
+		var first = event.changedTouches[0];
+		first.buttons = 0;
+
+		var evt = createMoveEvent("game-move", "touch", first, this.canvas, false);
+		this.canvas.dispatchEvent(evt);
+		event.preventDefault();		
+	};
+
 	this.element = this.canvas;
 
 	this.element.addEventListener("mousemove", this.mousemove.bind(this));
 	this.element.addEventListener("touchmove", this.touchmove.bind(this), true);
 	this.element.addEventListener("mousedown", this.mouseclick.bind(this));
+	this.element.addEventListener("touchstart", this.touchstart.bind(this));
 }

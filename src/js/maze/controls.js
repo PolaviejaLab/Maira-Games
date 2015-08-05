@@ -19,7 +19,7 @@ function Controls()
 
   this.lastMouseMoveTime = 0;
   this.lastKeyboardMoveTime = 0;
-  this.repeatInterval = 400;
+  this.repeatInterval = 200;
 
   // Mouse movement mode
 	this.mode = "direction";
