@@ -13,15 +13,19 @@ function Level()
 
 	this.levelMap = [[3]];
 
-	if(getQueryField("player") == 1)
-		this.levelMap = level1;
+	var level = parseInt(getQueryField("player"));
 
-	if(getQueryField("player") == 2)
-		this.levelMap = level2;
+	switch(level) {
+		case 0: this.levelMap = example; break;
+		case 1: this.levelMap = level1; break;
+		case 2: this.levelMap = level2; break;
+		case 3: this.levelMap = level3; break;
+	}
 
-	if(getQueryField("player") == 3)
-		this.levelMap = level3;
 
+	/**
+	 * Reset state of the game
+	 */
 	this.reset = function()
 	{
 		this.bombImage = new Image();
