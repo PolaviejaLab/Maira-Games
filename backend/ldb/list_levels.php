@@ -15,6 +15,8 @@
 		$items[] = "\n\t{ \"name\": \"$item\" }";
 	}
 
+	sort($items);
+
 	echo("[");
 	echo(join(", ", $items));
 	echo("\n]\n");
