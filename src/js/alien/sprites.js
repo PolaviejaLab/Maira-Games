@@ -62,6 +62,12 @@ var constructors = {
 		var frog = new Frog();
 		frog.fromArray(array);
 		return frog;
+	},
+
+	'snail': function(array) {
+		var snail = new Snail();
+		snail.fromArray(array);
+		return snail;
 	}
 };
 
@@ -214,6 +220,6 @@ var spriteTable = [
 	{key: 0x0A1B, src: 'frog/frog_move', collision: true, toolbox: false},
 	{key: 0x0A1C, src: 'frog/frog_dead', collision: true, toolbox: false},
 
-	{key: 0x0A20, src: 'snail/snail', frames: 2, collision: true, type: 'enemy'},
-	{key: 0x0A21, src: 'snail/snail', frames: 2, collision: true, type: 'enemy'},
+	{key: 0x0A20, src: 'snail/snail', frames: 2, collision: true, type: 'snail'},
+	//{key: 0x0A21, src: 'snail/snail', frames: 2, collision: true, type: 'snail'},
 ];
