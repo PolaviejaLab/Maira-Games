@@ -158,6 +158,7 @@ function LevelLoader(game)
  * Upgrade level from version 1 to version 2.
  *
  * @param {Array} data - Version 1 level returned from server
+ * @returns {Array} Version 2 level
  */
 function upgradeLevelVersion1(data)
 {
