@@ -1,3 +1,6 @@
+backend/datasets
+backend/ldb/levels
+
 # Generated Documentation
 doc
 !doc/*.bat
