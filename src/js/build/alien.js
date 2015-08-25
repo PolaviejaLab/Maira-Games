@@ -2058,7 +2058,7 @@ var constructors = {
 
 var spriteTable = [
 	{key: 0x0001, src: 'clipping', collision: true},
-	{key: 0x0002, src: 'sara/idle/r/1', collision: false, type: 'player'},
+	{key: 0x0002, src: 'sara/idle_left_1', collision: false, type: 'player'},
 
 	{key: 0x0010, src: 'sara/idle_left',  frames: 3, toolbox: false},
 	{key: 0x0011, src: 'sara/idle_right', frames: 3, toolbox: false},
