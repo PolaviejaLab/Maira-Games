@@ -13,30 +13,6 @@ function SpriteManager()
 	this.sprites = {};
 	var imageMap = {};
 
-	this.loadFromSpriteTable(spriteTable);
-
-	for(var i = 1; i < 4; i++) {
-		imageMap['player_idle_left_' + i] = 'tiles/sara/idle/l/' + i + '.png';
-		imageMap['player_walk_left_' + i] = 'tiles/sara/walk/l/' + i + '.png';
-		imageMap['player_jump_left_' + i] = 'tiles/sara/jump/l/' + i + '.png';
-
-		imageMap['player_idle_right_' + i] = 'tiles/sara/idle/r/' + i + '.png';
-		imageMap['player_walk_right_' + i] = 'tiles/sara/walk/r/' + i + '.png';
-		imageMap['player_jump_right_' + i] = 'tiles/sara/jump/r/' + i + '.png';
-	}
-
-	for(var name in imageMap) {
-		if(typeof imageMap[name] == 'array') {
-			for(var i = 0; i < imageMap[name].length; i++) {
-				imageMap[name].length
-			}
-		} else {
-			this.sprites[name] = new Image();
-			this.sprites[name].src = imageMap[name];
-		}
-	}
-
-
 	/**
 	 * Returns whether a given sprite is valid.
 	 *
@@ -126,23 +102,73 @@ SpriteManager.prototype.getHeight = function(sprite)
 }
 
 
-SpriteManager.prototype.loadFromSpriteTable =  function(spriteTable)
+SpriteManager.prototype.loadImage = function(key, frame, source)
 {
-	/** Load sprites from sprite table **/
-	for(var i = 0; i < spriteTable.length; i++) {
-		var key = spriteTable[i]['key'];
+	return new Promise(function(resolve, reject) {
+		// Create array for frame if it does not already exist
+		if(!(key in this.sprites))
+			this.sprites[key] = [];
 
-		if('frames' in spriteTable[i]) {
-			var sprite_array = [];
-			for(var j = 1; j <= spriteTable[i]['frames']; j++) {
-				sprite_array[j - 1] = new Image();
-				sprite_array[j - 1].src = 'tiles/' + spriteTable[i]['src'] + "_" + j + '.png';
+		this.sprites[key][frame] = new Image();
+
+		this.sprites[key][frame].onload = function() {
+			resolve();
+		}.bind(this);
+
+		this.sprites[key][frame].onerror = function() {
+			console.log("Loading of '" + source + "' failed")
+			reject();
+		}.bind(this);
+
+		this.sprites[key][frame].src = source;
+	}.bind(this));
+}
+
+
+SpriteManager.prototype.loadFromSpriteTable = function(spriteTable, update)
+{
+	return new Promise(function(resolve, reject) {
+		var count = 0;
+
+		// Determine number of images to load
+		for(var i = 0; i < spriteTable.length; i++) {
+			if('frames' in spriteTable[i])
+				count += spriteTable[i]['frames'];
+			else
+				count += 1;
+		}
+
+		var images_left = count;
+
+		/** Load sprites from sprite table **/
+		for(var i = 0; i < spriteTable.length; i++) {
+			var key = spriteTable[i]['key'];
+
+			// For animated sprites, create array with one image per frame
+			if('frames' in spriteTable[i]) {
+				for(var j = 1; j <= spriteTable[i]['frames']; j++) {
+					this.loadImage(key, j - 1, 'tiles/' + spriteTable[i]['src'] + "_" + j + '.png').then(
+						function() {
+							images_left--;
+							if(images_left == 0)
+								resolve();
+							else
+								update(images_left, count);
+						}.bind(this));
+				}
+
+				continue;
 			}
 
-			this.sprites[key]  = sprite_array;
-		} else {
-			this.sprites[key] = [new Image()];
-			this.sprites[key][0].src = 'tiles/' + spriteTable[i]['src'] + '.png';
+			// For other sprites, create a 1-frame animation
+			this.loadImage(key, 0, 'tiles/' + spriteTable[i]['src'] + '.png').then(
+				function() {
+					images_left--;
+					if(images_left == 0)
+						resolve();
+					else
+						update(images_left, count);
+				}.bind(this));
 		}
-	}
+	}.bind(this));
 }

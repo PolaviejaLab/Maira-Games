@@ -76,6 +76,13 @@ var spriteTable = [
 	{key: 0x0001, src: 'clipping', collision: true},
 	{key: 0x0002, src: 'sara/idle/r/1', collision: false, type: 'player'},
 
+	{key: 0x0010, src: 'sara/idle_left',  frames: 3, toolbox: false},
+	{key: 0x0011, src: 'sara/idle_right', frames: 3, toolbox: false},
+	{key: 0x0012, src: 'sara/walk_left',  frames: 3, toolbox: false},
+	{key: 0x0013, src: 'sara/walk_right', frames: 3, toolbox: false},
+	{key: 0x0014, src: 'sara/jump_left',  frames: 3, toolbox: false},
+	{key: 0x0015, src: 'sara/jump_right', frames: 3, toolbox: false},
+
 	/* Grass */
 	{key: 0x0101, src: 'grass/grassLeft', collision: true},
 	{key: 0x0102, src: 'grass/grassMid', collision: true},

@@ -912,7 +912,7 @@ Editor.prototype.setupMouse = function(canvas)
 function Game()
 {
   this.levelBounds = {x: 0, y: 0, width: 32, height: 32 };
-  this.spriteManager = new SpriteManager();
+  this.spriteManager = new SpriteManager();  
   this.engine = false;
   this.scroll = {x: 0, y: 0};
   this.deadzone = {w: 128};
@@ -1056,30 +1056,6 @@ function SpriteManager()
 	this.sprites = {};
 	var imageMap = {};
 
-	this.loadFromSpriteTable(spriteTable);
-
-	for(var i = 1; i < 4; i++) {
-		imageMap['player_idle_left_' + i] = 'tiles/sara/idle/l/' + i + '.png';
-		imageMap['player_walk_left_' + i] = 'tiles/sara/walk/l/' + i + '.png';
-		imageMap['player_jump_left_' + i] = 'tiles/sara/jump/l/' + i + '.png';
-
-		imageMap['player_idle_right_' + i] = 'tiles/sara/idle/r/' + i + '.png';
-		imageMap['player_walk_right_' + i] = 'tiles/sara/walk/r/' + i + '.png';
-		imageMap['player_jump_right_' + i] = 'tiles/sara/jump/r/' + i + '.png';
-	}
-
-	for(var name in imageMap) {
-		if(typeof imageMap[name] == 'array') {
-			for(var i = 0; i < imageMap[name].length; i++) {
-				imageMap[name].length
-			}
-		} else {
-			this.sprites[name] = new Image();
-			this.sprites[name].src = imageMap[name];
-		}
-	}
-
-
 	/**
 	 * Returns whether a given sprite is valid.
 	 *
@@ -1169,25 +1145,75 @@ SpriteManager.prototype.getHeight = function(sprite)
 }
 
 
-SpriteManager.prototype.loadFromSpriteTable =  function(spriteTable)
+SpriteManager.prototype.loadImage = function(key, frame, source)
 {
-	/** Load sprites from sprite table **/
-	for(var i = 0; i < spriteTable.length; i++) {
-		var key = spriteTable[i]['key'];
+	return new Promise(function(resolve, reject) {
+		// Create array for frame if it does not already exist
+		if(!(key in this.sprites))
+			this.sprites[key] = [];
 
-		if('frames' in spriteTable[i]) {
-			var sprite_array = [];
-			for(var j = 1; j <= spriteTable[i]['frames']; j++) {
-				sprite_array[j - 1] = new Image();
-				sprite_array[j - 1].src = 'tiles/' + spriteTable[i]['src'] + "_" + j + '.png';
+		this.sprites[key][frame] = new Image();
+
+		this.sprites[key][frame].onload = function() {
+			resolve();
+		}.bind(this);
+
+		this.sprites[key][frame].onerror = function() {
+			console.log("Loading of '" + source + "' failed")
+			reject();
+		}.bind(this);
+
+		this.sprites[key][frame].src = source;
+	}.bind(this));
+}
+
+
+SpriteManager.prototype.loadFromSpriteTable = function(spriteTable, update)
+{
+	return new Promise(function(resolve, reject) {
+		var count = 0;
+
+		// Determine number of images to load
+		for(var i = 0; i < spriteTable.length; i++) {
+			if('frames' in spriteTable[i])
+				count += spriteTable[i]['frames'];
+			else
+				count += 1;
+		}
+
+		var images_left = count;
+
+		/** Load sprites from sprite table **/
+		for(var i = 0; i < spriteTable.length; i++) {
+			var key = spriteTable[i]['key'];
+
+			// For animated sprites, create array with one image per frame
+			if('frames' in spriteTable[i]) {
+				for(var j = 1; j <= spriteTable[i]['frames']; j++) {
+					this.loadImage(key, j - 1, 'tiles/' + spriteTable[i]['src'] + "_" + j + '.png').then(
+						function() {
+							images_left--;
+							if(images_left == 0)
+								resolve();
+							else
+								update(images_left, count);
+						}.bind(this));
+				}
+
+				continue;
 			}
 
-			this.sprites[key]  = sprite_array;
-		} else {
-			this.sprites[key] = [new Image()];
-			this.sprites[key][0].src = 'tiles/' + spriteTable[i]['src'] + '.png';
+			// For other sprites, create a 1-frame animation
+			this.loadImage(key, 0, 'tiles/' + spriteTable[i]['src'] + '.png').then(
+				function() {
+					images_left--;
+					if(images_left == 0)
+						resolve();
+					else
+						update(images_left, count);
+				}.bind(this));
 		}
-	}
+	}.bind(this));
 }
 
 // Source: src/js/alien/level.js
@@ -2033,6 +2059,13 @@ var constructors = {
 var spriteTable = [
 	{key: 0x0001, src: 'clipping', collision: true},
 	{key: 0x0002, src: 'sara/idle/r/1', collision: false, type: 'player'},
+
+	{key: 0x0010, src: 'sara/idle_left',  frames: 3, toolbox: false},
+	{key: 0x0011, src: 'sara/idle_right', frames: 3, toolbox: false},
+	{key: 0x0012, src: 'sara/walk_left',  frames: 3, toolbox: false},
+	{key: 0x0013, src: 'sara/walk_right', frames: 3, toolbox: false},
+	{key: 0x0014, src: 'sara/jump_left',  frames: 3, toolbox: false},
+	{key: 0x0015, src: 'sara/jump_right', frames: 3, toolbox: false},
 
 	/* Grass */
 	{key: 0x0101, src: 'grass/grassLeft', collision: true},
@@ -3249,7 +3282,7 @@ function Player()
 
 		var deltaT = (this.engine.timestamp - this.animationStart) / 120;
 
-		return base + Math.floor(1 + deltaT % frames);
+		return Math.floor(1 + deltaT % frames);
 	}
 
 
@@ -3308,17 +3341,17 @@ function Player()
 		if(this.finished)
 			this.drawFinishedMessage(context);
 
-		if(this.velX > 0.3) {
-			sprite = this.animate('player_walk_right_', 3);
-		} else if(this.velX < -0.3) {
-			sprite = this.animate('player_walk_left_', 3);
-		} else if(this.faceRight) {
-			sprite = this.animate('player_idle_right_', 3);
+		// Determine whether to use running or walking sprite...
+		if(Math.abs(this.velX) > 0.3) {
+			sprite = this.faceRight?0x0013:0x0012;
 		} else {
-			sprite = this.animate('player_idle_left_', 3);
+			sprite = this.faceRight?0x0011:0x0010;
 		}
 
-		this.parent.spriteManager.drawSprite(context, this, sprite, 0, function(context) {
+		var frameCount = 3;
+		var frame = (this.getEngine().timestamp >> 7) % frameCount;
+
+		this.parent.spriteManager.drawSprite(context, this, sprite, frame, function(context) {
 			context.scale(1, this.scale);
 		}.bind(this));
 	}
@@ -3474,10 +3507,6 @@ function Snail()
 
   this.sprite = 0;
 
-  // Worm and player objects to check collisions against
-  this.player = false;
-  this.worms = [];
-
 
   /**
    * Serialize state to array
@@ -3511,18 +3540,6 @@ function Snail()
     this.x = this.baseX;
     this.y = this.baseY;
     this.alive = true;
-
-    // Find worms
-    var names = this.parent.getObjectNames();
-
-    for(var i = 0; i < names.length; i++) {
-      var object = this.parent.getObject(names[i]);
-      if(object.type == 'worm')
-        this.worms.push(object);
-    }
-
-    // Find player
-    this.player = this.parent.getObject("player_1");
   }
 
 
@@ -3554,7 +3571,6 @@ function Snail()
    */
   this.update = function(keyboard)
   {
-    var push_key = keyboard.keys[keyboard.KEY_P];
     var level = this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
@@ -3583,30 +3599,6 @@ function Snail()
 
     this.velY += this.gravity;
     this.y += this.velY;
-
-    // Kill any worms that we encounter
-    for(var i = 0; i < this.worms.length; i++) {
-      var collision = collisionCheck(this, this.worms[i]);
-
-      if(collision)
-        this.worms[i].kill();
-    }
-
-
-    var collision = collisionCheck(this, this.player);
-
-    if(!collision)
-      return;
-
-    // Move when being pushed by the player
-    if(push_key && this.alive) {
-      if(collision.axis == 'x' && Math.abs(collision.normal.x) < 5)
-        this.x += collision.normal.x;
-    }
-
-    // Kill snail when jumped on it from the top
-    if(collision.axis == 'y' && this.player.velY > 4)
-      this.alive = false;
   }
 
 

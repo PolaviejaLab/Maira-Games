@@ -104,6 +104,11 @@
 				</div>
 				<div class="panel-body">
 					Pre-loading game content, please wait.
+
+					<div class="progress">
+					  <div id="progress-bar" class="progress-bar" style="width: 0%;">
+					  </div>
+					</div>
 				</div>
 			</div>
 
@@ -270,36 +275,41 @@
 				 */
 				var engine = new Engine();
 				var game = new Game();
-				var main = game;
 
-				if(options.editMode) {
-					editor = new Editor(game);
-					var spriteBox = new SpriteBox("spriteBox", editor, spriteTable);
+				game.spriteManager.loadFromSpriteTable(spriteTable,
+					function(left, total) {						
+						document.getElementById("progress-bar").style.width = (total-left)/total*100 + "%";
+					}).then(function() {
+						var main = game;
 
-					main = editor;
-				}
+						if(options.editMode) {
+							editor = new Editor(game);
+							var spriteBox = new SpriteBox("spriteBox", editor, spriteTable);
 
-				engine.initializeEngine(canvas_id, 32 * width, 32 * (height + 2 * (options.editMode?1:0)), main);
-				engine.debugMode = options.debugMode;
+							main = editor;
+						}
 
-				loader = new LevelLoader(game);
+						engine.initializeEngine(canvas_id, 32 * width, 32 * (height + 2 * (options.editMode?1:0)), main);
+						engine.debugMode = options.debugMode;
+
+						loader = new LevelLoader(game);
 
 
-				/**
-			 	 * Initialize level and player objects
-			 	 */
-				loader.loadLevel(options.levelName).then(function(response) {
-					$("#loading-screen").fadeOut(500, function() {
-						$("#game-canvas").fadeIn(250);
+						/**
+			 	 		 * Initialize level and player objects
+			 	 		 */
+						loader.loadLevel(options.levelName).then(function(response) {
+							$("#loading-screen").fadeOut(500, function() {
+								$("#game-canvas").fadeIn(250);
+							});
+						}, function(error) {
+							console.log("loadLevel() failed " + error);
+
+							$("#loading-screen").fadeOut(500, function() {
+								$("#level-error").fadeIn(250);
+							});
+						});
 					});
-				}, function(error) {
-					console.log("loadLevel() failed " + error);
-
-					$("#loading-screen").fadeOut(500, function() {
-						$("#level-error").fadeIn(250);
-					});
-				});
-
 			}());
 		</script>
 

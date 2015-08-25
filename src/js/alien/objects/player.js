@@ -473,7 +473,7 @@ function Player()
 
 		var deltaT = (this.engine.timestamp - this.animationStart) / 120;
 
-		return base + Math.floor(1 + deltaT % frames);
+		return Math.floor(1 + deltaT % frames);
 	}
 
 
@@ -532,17 +532,17 @@ function Player()
 		if(this.finished)
 			this.drawFinishedMessage(context);
 
-		if(this.velX > 0.3) {
-			sprite = this.animate('player_walk_right_', 3);
-		} else if(this.velX < -0.3) {
-			sprite = this.animate('player_walk_left_', 3);
-		} else if(this.faceRight) {
-			sprite = this.animate('player_idle_right_', 3);
+		// Determine whether to use running or walking sprite...
+		if(Math.abs(this.velX) > 0.3) {
+			sprite = this.faceRight?0x0013:0x0012;
 		} else {
-			sprite = this.animate('player_idle_left_', 3);
+			sprite = this.faceRight?0x0011:0x0010;
 		}
 
-		this.parent.spriteManager.drawSprite(context, this, sprite, 0, function(context) {
+		var frameCount = 3;
+		var frame = (this.getEngine().timestamp >> 7) % frameCount;
+
+		this.parent.spriteManager.drawSprite(context, this, sprite, frame, function(context) {
 			context.scale(1, this.scale);
 		}.bind(this));
 	}
