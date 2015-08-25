@@ -63,4 +63,4 @@
 
 
 	$data = json_decode(file_get_contents('php://input'), true);
-	append_data_to_file($data, get_filename, write_header, write_data);
+	append_data_to_file($data, @get_filename, @write_header, @write_data);
