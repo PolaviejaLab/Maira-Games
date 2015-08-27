@@ -52,6 +52,9 @@ function Rock()
   {
     this.x = this.baseX;
     this.y = this.baseY;
+
+    // Find player
+    this.player = this.parent.getObject("player_1");
   }
 
 
@@ -81,15 +84,16 @@ function Rock()
   /**
    * Updates the rock
    */
-  this.update = function()
+  this.update = function(keyboard)
   {
+    var push_key = keyboard.keys[keyboard.KEY_P];
     var level = this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
     var oriY = this.y + 10 + (dirY == 1) * (this.height - 20);
 
     /**
-     * Make sure hitting spikes or water causes the enemy to touch the surface
+     * Make sure hitting spikes or water causes the frog to touch the surface
      */
     var callback = function(hit) {
       if(hit.type == 'water') {
@@ -99,6 +103,7 @@ function Rock()
       return hit;
     }
 
+    // Apply gravity
     var hit = level.sensor(
       { x: this.x + this.width / 2, y: oriY },
       { x: 0, y: dirY }, 256, callback);
@@ -110,6 +115,20 @@ function Rock()
 
     this.velY += this.gravity;
     this.y += this.velY;
+
+    //this.height=16;
+    var collision = collisionCheck({x: this.x, y: this.y, width: this.width, height:16}, this.player);
+
+    if(!collision)
+      return;    
+
+    // Move when being pushed by the player
+    //  && Math.abs(collision.normal.x) < 5
+    if(collision.axis == 'x') {
+      if(push_key) {
+        this.x += collision.normal.x;
+      }
+    }
   }
 
 

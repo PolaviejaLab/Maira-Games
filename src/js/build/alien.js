@@ -677,6 +677,28 @@ function getOptionsFromQuery()
   return options;
 }
 
+// Source: src/js/alien/collider.js
+/** @module Collider **/
+function Collider(object)
+{
+  this.parentObject = object;
+  this.regions = [];
+}
+
+
+Collider.prototype.addRegion = function(region)
+{
+  this.regions.push(region);
+}
+
+
+Collider.prototype.draw = function()
+{
+  for(var i = 0; i < this.regions.length; i++) {
+    console.log(i);
+  }
+}
+
 // Source: src/js/alien/editor.js
 /** @module Alien **/
 /**
@@ -1253,6 +1275,7 @@ function Level(levelMap)
 		}
 
 		this.cacheLevelGeometry();
+		this.generateCollisionGeometry();
 	};
 
 
@@ -1448,6 +1471,52 @@ function Level(levelMap)
 
 
 	/**
+	 *
+	 */
+	this.generateCollisionGeometry = function()
+	{
+		console.log("-- Generating collision geometry --");
+
+		var width = this.levelMap[0].length * 32;
+		var height = this.levelMap.length * 32;
+
+		width = Math.pow(2, Math.ceil(Math.log(width) / Math.log(2)));
+		height = Math.pow(2, Math.ceil(Math.log(height) / Math.log(2)));
+
+		this.collisionBoxes = new QuadTree(undefined, new Box(0, 0, width, height));
+
+		for(var i = 0; i < this.levelMap.length; i++) {
+			for(var j = 0; j < this.levelMap[0].length; j++) {
+				var sprite = this.levelMap[i][j];
+
+				if(sprite == 0)
+					continue;
+
+				if(this.collisionTypes[sprite] === true || this.collisionTypes[sprite] == 'waterBody') {
+					this.collisionBoxes.insert(new Box(j * 32, i * 32, 32, 32));
+				}
+
+				if(this.collisionTypes[sprite] === 'topHalf') {
+					this.collisionBoxes.insert(new Box(j * 32, i * 32, 32, 17));
+				}
+
+				if(this.collisionTypes[sprite] === 'hillUp') {
+					for(var k = 0; k < 32; k++) {
+						this.collisionBoxes.insert(new Box(j * 32, i * 32 + k, k, 1));
+					}
+				}
+
+				if(this.collisionTypes[sprite] === 'hillDown') {
+					for(var k = 0; k < 32; k++) {
+						this.collisionBoxes.insert(new Box(j * 32 + (32 - k), i * 32 + k, k, 1));
+					}
+				}
+			}
+		}
+	}
+
+
+	/**
 	 * Creates a cache of the level geometry. This cache consists of two parts:
 	 *   - An image containing all the static geometry
 	 *   - An array containing coordinates and IDs for all animated sprites
@@ -1514,6 +1583,28 @@ function Level(levelMap)
 
 
 	/**
+	 * Draw collision boxes
+	 *
+	 * @param {Context} context - Context to draw to.
+	 */
+	this.drawDebugCollisionBoxes = function(context)
+	{
+		this.collisionBoxes.draw(context);
+
+		var player = this.parent.getObject("player_1");
+		var box = new Box(player.x - 10, player.y - 10, player.width + 20, player.height + 20);
+
+		box.draw(context, 'black');
+
+		var collisions = this.collisionBoxes.query(box);
+
+		for(var i = 0; i < collisions.length; i++) {
+			collisions[i].draw(context, 'red');
+		}
+	}
+
+
+	/**
 	 * Draw entire level.
 	 *
 	 * @param {Context} context - Context to draw to.
@@ -1527,7 +1618,10 @@ function Level(levelMap)
 			this.drawSprite(context, item.x, item.y, item.sprite, item.frameCount);
 		}
 
-		this.drawDebugLines(context);
+		if(this.getEngine().debugMode) {
+			this.drawDebugLines(context);
+			this.drawDebugCollisionBoxes(context);
+		}
 	};
 }
 
@@ -1589,6 +1683,7 @@ Level.prototype.setSprite = function(coords, sprite)
 	this.levelMap[coords.y][coords.x] = sprite;
 
 	this.cacheLevelGeometry();
+	this.generateCollisionGeometry();
 };
 
 // Source: src/js/alien/level_loader.js
@@ -1982,6 +2077,225 @@ function sign(number)
 function lerp(from, to, t)
 {
 	return from + (to - from) * t;
+}
+
+// Source: src/js/alien/quadtree.js
+/** @module Alien **/
+function Box(x, y, width, height)
+{
+  this.x = x;
+  this.y = y;
+  this.width = width;
+  this.height = height;
+}
+
+
+/**
+ * Checks whether this box completely contains the box.
+ */
+Box.prototype.contains = function(box)
+{
+  return box.x >= this.x && box.x + box.width <= this.x + this.width &&
+         box.y >= this.y && box.y + box.height <= this.y + this.height;
+}
+
+
+/**
+ * Checks whether this box contains a given point
+ */
+Box.prototype.containsPoint = function(point)
+{
+  return point.x >= box.x && point.x <= box.x + box.width &&
+         point.y >= box.y && point.y <= box.y + box.height;
+}
+
+
+Box.prototype.intersects = function(box)
+{
+  var gapYA = this.y - (box.y + box.height);
+	var gapYB = box.y - (this.y + this.height);
+
+  var gapXA = this.x - (box.x + box.width);
+	var gapXB = box.x - (this.x + this.width);
+
+  if(gapXA >= 0 || gapXB >= 0 || gapYA >= 0 || gapYB >= 0)
+		return false;
+
+  return true;
+}
+
+
+Box.prototype.draw = function(context, color)
+{
+  context.beginPath();
+  context.moveTo(this.x, this.y);
+  context.lineTo(this.x + this.width, this.y);
+  context.lineTo(this.x + this.width, this.y + this.height);
+  context.lineTo(this.x, this.y + this.height);
+  context.closePath();
+  context.strokeStyle = color;
+  context.stroke();
+}
+
+
+function QuadTree(parent, boundary)
+{
+  console.log("Created new QuadTree with boundary: ", boundary);
+
+  // Parent of this QuadTree
+  this.parent = parent;
+
+  // Boundary of this quadtree
+  this.boundary = boundary;
+
+  // Contains objects
+  this.bucket = [];
+  this.bucketSize = 16;
+
+  // Subdivisions
+  this.northWest = undefined;
+  this.northEast = undefined;
+  this.southWest = undefined;
+  this.southEast = undefined;
+}
+
+
+/**
+ * Returns all boxes (partially) within the specified box.
+ */
+QuadTree.prototype.query = function(box, partials)
+{
+  // Return objects that are partially contained by default
+  if(partials === undefined)
+    partials = true;
+
+  var boxesInRange = [];
+
+  if(!this.boundary.intersects(box))
+    return boxesInRange;
+
+  for(var i = 0; i < this.bucket.length; i++) {
+    if(partials && box.intersects(this.bucket[i]))
+      boxesInRange.push(this.bucket[i]);
+    if(!partials && box.contains(this.bucket[i]))
+      boxesInRange.push(this.bucket[i]);
+  }
+
+  if(this.northWest === undefined)
+    return boxesInRange;
+
+  Array.prototype.push.apply(boxesInRange, this.northWest.query(box, partials));
+  Array.prototype.push.apply(boxesInRange, this.northEast.query(box, partials));
+  Array.prototype.push.apply(boxesInRange, this.southWest.query(box, partials));
+  Array.prototype.push.apply(boxesInRange, this.southEast.query(box, partials));
+
+  return boxesInRange;
+}
+
+
+/**
+ * Insert an object into this branch. Returns false
+ *  if the object does not belong here.
+ */
+QuadTree.prototype.insert = function(object)
+{
+  // The object does not belong in this QuadTree
+  if(!this.boundary.contains(object))
+    return false;
+
+  // Subdivide if bucket is full
+  if(this.bucket.length >= this.bucketSize)
+    this.subdivide();
+
+  if(this.northWest !== undefined) {
+    if(this.northWest.insert(object))
+      return true;
+    if(this.northEast.insert(object))
+      return true;
+    if(this.southEast.insert(object))
+      return true;
+    if(this.southWest.insert(object))
+      return true;
+  }
+
+  this.bucket.push(object);
+
+  return true;
+}
+
+
+/**
+ * Redistributes the boxes in our bucket over the child branches
+ *  if the object does not belong in this branch, send it back
+ *  to the parent.
+ */
+QuadTree.prototype.redistribute = function()
+{
+  // No quadrants, return
+  if(this.northWest === undefined)
+    return;
+
+  // Reinsert items into structure
+  var oldBucket = this.bucket;
+  this.bucket = [];
+
+  console.log("Redistributing " + oldBucket.length + " items");
+
+  for(var i = 0; i < oldBucket.length; i++) {
+    if(this.insert(oldBucket[i]))
+      continue;
+
+    // Inserting failed, verify that parent exists
+    if(this.parent === undefined) {
+      console.log("Object does not belong in this tree, inserting it at the root", object);
+      this.bucket.push(object);
+      continue;
+    }
+
+    // And attempt to insert into parent
+    this.parent.insert(oldBucket[i]);
+  }
+}
+
+
+QuadTree.prototype.subdivide = function()
+{
+  // Ignore if already subdivided
+  if(this.northWest !== undefined)
+    return;
+
+  var boundary = this.boundary;
+
+  var x0 = boundary.x;
+  var y0 = boundary.y;
+  var x1 = boundary.x + boundary.width / 2;
+  var y1 = boundary.y + boundary.height / 2;
+  var x2 = boundary.x + boundary.width;
+  var y2 = boundary.y + boundary.height;
+
+  this.northWest = new QuadTree(this, new Box(x0, y0, x1 - x0, y1 - y0));
+  this.northEast = new QuadTree(this, new Box(x1, y0, x2 - x1, y1 - y0));
+  this.southWest = new QuadTree(this, new Box(x0, y1, x1 - x0, y2 - y1));
+  this.southEast = new QuadTree(this, new Box(x1, y1, x2 - x1, y2 - y1));
+
+  this.redistribute();
+}
+
+
+QuadTree.prototype.draw = function(context)
+{
+  for(var i = 0; i < this.bucket.length; i++) {
+    this.bucket[i].draw(context, 'blue');
+  }
+
+  if(this.northWest !== undefined) {
+    this.northWest.draw(context);
+    this.northEast.draw(context);
+    this.southEast.draw(context);
+    this.southWest.draw(context);
+  }
+
+  this.boundary.draw(context, 'green');
 }
 
 // Source: src/js/alien/sprites.js
@@ -3412,6 +3726,9 @@ function Rock()
   {
     this.x = this.baseX;
     this.y = this.baseY;
+
+    // Find player
+    this.player = this.parent.getObject("player_1");
   }
 
 
@@ -3441,15 +3758,16 @@ function Rock()
   /**
    * Updates the rock
    */
-  this.update = function()
+  this.update = function(keyboard)
   {
+    var push_key = keyboard.keys[keyboard.KEY_P];
     var level = this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
     var oriY = this.y + 10 + (dirY == 1) * (this.height - 20);
 
     /**
-     * Make sure hitting spikes or water causes the enemy to touch the surface
+     * Make sure hitting spikes or water causes the frog to touch the surface
      */
     var callback = function(hit) {
       if(hit.type == 'water') {
@@ -3459,6 +3777,7 @@ function Rock()
       return hit;
     }
 
+    // Apply gravity
     var hit = level.sensor(
       { x: this.x + this.width / 2, y: oriY },
       { x: 0, y: dirY }, 256, callback);
@@ -3470,6 +3789,20 @@ function Rock()
 
     this.velY += this.gravity;
     this.y += this.velY;
+
+    //this.height=16;
+    var collision = collisionCheck({x: this.x, y: this.y, width: this.width, height:16}, this.player);
+
+    if(!collision)
+      return;    
+
+    // Move when being pushed by the player
+    //  && Math.abs(collision.normal.x) < 5
+    if(collision.axis == 'x') {
+      if(push_key) {
+        this.x += collision.normal.x;
+      }
+    }
   }
 
 

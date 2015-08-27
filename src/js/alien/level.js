@@ -36,6 +36,7 @@ function Level(levelMap)
 		}
 
 		this.cacheLevelGeometry();
+		this.generateCollisionGeometry();
 	};
 
 
@@ -231,6 +232,52 @@ function Level(levelMap)
 
 
 	/**
+	 *
+	 */
+	this.generateCollisionGeometry = function()
+	{
+		console.log("-- Generating collision geometry --");
+
+		var width = this.levelMap[0].length * 32;
+		var height = this.levelMap.length * 32;
+
+		width = Math.pow(2, Math.ceil(Math.log(width) / Math.log(2)));
+		height = Math.pow(2, Math.ceil(Math.log(height) / Math.log(2)));
+
+		this.collisionBoxes = new QuadTree(undefined, new Box(0, 0, width, height));
+
+		for(var i = 0; i < this.levelMap.length; i++) {
+			for(var j = 0; j < this.levelMap[0].length; j++) {
+				var sprite = this.levelMap[i][j];
+
+				if(sprite == 0)
+					continue;
+
+				if(this.collisionTypes[sprite] === true || this.collisionTypes[sprite] == 'waterBody') {
+					this.collisionBoxes.insert(new Box(j * 32, i * 32, 32, 32));
+				}
+
+				if(this.collisionTypes[sprite] === 'topHalf') {
+					this.collisionBoxes.insert(new Box(j * 32, i * 32, 32, 17));
+				}
+
+				if(this.collisionTypes[sprite] === 'hillUp') {
+					for(var k = 0; k < 32; k++) {
+						this.collisionBoxes.insert(new Box(j * 32, i * 32 + k, k, 1));
+					}
+				}
+
+				if(this.collisionTypes[sprite] === 'hillDown') {
+					for(var k = 0; k < 32; k++) {
+						this.collisionBoxes.insert(new Box(j * 32 + (32 - k), i * 32 + k, k, 1));
+					}
+				}
+			}
+		}
+	}
+
+
+	/**
 	 * Creates a cache of the level geometry. This cache consists of two parts:
 	 *   - An image containing all the static geometry
 	 *   - An array containing coordinates and IDs for all animated sprites
@@ -297,6 +344,28 @@ function Level(levelMap)
 
 
 	/**
+	 * Draw collision boxes
+	 *
+	 * @param {Context} context - Context to draw to.
+	 */
+	this.drawDebugCollisionBoxes = function(context)
+	{
+		this.collisionBoxes.draw(context);
+
+		var player = this.parent.getObject("player_1");
+		var box = new Box(player.x - 10, player.y - 10, player.width + 20, player.height + 20);
+
+		box.draw(context, 'black');
+
+		var collisions = this.collisionBoxes.query(box);
+
+		for(var i = 0; i < collisions.length; i++) {
+			collisions[i].draw(context, 'red');
+		}
+	}
+
+
+	/**
 	 * Draw entire level.
 	 *
 	 * @param {Context} context - Context to draw to.
@@ -310,7 +379,10 @@ function Level(levelMap)
 			this.drawSprite(context, item.x, item.y, item.sprite, item.frameCount);
 		}
 
-		this.drawDebugLines(context);
+		if(this.getEngine().debugMode) {
+			this.drawDebugLines(context);
+			this.drawDebugCollisionBoxes(context);
+		}
 	};
 }
 
@@ -372,4 +444,5 @@ Level.prototype.setSprite = function(coords, sprite)
 	this.levelMap[coords.y][coords.x] = sprite;
 
 	this.cacheLevelGeometry();
+	this.generateCollisionGeometry();
 };
