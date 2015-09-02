@@ -59,9 +59,28 @@ Box.prototype.draw = function(context, color)
 }
 
 
+function BoxArray()
+{
+  this.query = function(box)
+  {
+    var boxesInRange = [];
+
+    for(var i = 0; i < this.bucket.length; i++) {
+      if(box.intersects(this.bucket[i]))
+        boxesInRange.push(this.bucket[i]);
+    }
+
+    return boxesInRange;
+  }
+}
+
+
+BoxArray.prototype = Array.prototype;
+
+
 function QuadTree(parent, boundary)
 {
-  console.log("Created new QuadTree with boundary: ", boundary);
+  //console.log("Created new QuadTree with boundary: ", boundary);
 
   // Parent of this QuadTree
   this.parent = parent;
@@ -91,6 +110,14 @@ QuadTree.prototype.query = function(box, partials)
     partials = true;
 
   var boxesInRange = [];
+
+  // If box is actually an array of boxes, return all boxes
+  // (partially) within any of them.
+  if('length' in box) {
+    for(var i = 0; i < box.length; i++)
+      Array.prototype.push.apply(boxesInRange, this.query(box[i], partials));
+    return boxesInRange;
+  }
 
   if(!this.boundary.intersects(box))
     return boxesInRange;
@@ -160,7 +187,7 @@ QuadTree.prototype.redistribute = function()
   var oldBucket = this.bucket;
   this.bucket = [];
 
-  console.log("Redistributing " + oldBucket.length + " items");
+  //console.log("Redistributing " + oldBucket.length + " items");
 
   for(var i = 0; i < oldBucket.length; i++) {
     if(this.insert(oldBucket[i]))

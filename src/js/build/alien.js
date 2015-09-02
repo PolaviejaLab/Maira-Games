@@ -677,28 +677,6 @@ function getOptionsFromQuery()
   return options;
 }
 
-// Source: src/js/alien/collider.js
-/** @module Collider **/
-function Collider(object)
-{
-  this.parentObject = object;
-  this.regions = [];
-}
-
-
-Collider.prototype.addRegion = function(region)
-{
-  this.regions.push(region);
-}
-
-
-Collider.prototype.draw = function()
-{
-  for(var i = 0; i < this.regions.length; i++) {
-    console.log(i);
-  }
-}
-
 // Source: src/js/alien/editor.js
 /** @module Alien **/
 /**
@@ -934,7 +912,7 @@ Editor.prototype.setupMouse = function(canvas)
 function Game()
 {
   this.levelBounds = {x: 0, y: 0, width: 32, height: 32 };
-  this.spriteManager = new SpriteManager();  
+  this.spriteManager = new SpriteManager();
   this.engine = false;
   this.scroll = {x: 0, y: 0};
   this.deadzone = {w: 128};
@@ -1257,6 +1235,9 @@ function Level(levelMap)
 	// Variable that contains canvas for drawing static level elements
 	this.staticLevelCanvas = document.createElement("canvas");
 
+	// Variable that contains collision geometry
+	this.collisionBoxes = undefined;
+
 	// Variable that contains coordinates and IDs for animated sprites
 	this.dynamicLevelGeometry = [];
 
@@ -1471,15 +1452,14 @@ function Level(levelMap)
 
 
 	/**
-	 *
+	 * Cache level geometry
 	 */
 	this.generateCollisionGeometry = function()
 	{
-		console.log("-- Generating collision geometry --");
-
 		var width = this.levelMap[0].length * 32;
 		var height = this.levelMap.length * 32;
 
+		// Find nearest power of two, to align bins with level grid
 		width = Math.pow(2, Math.ceil(Math.log(width) / Math.log(2)));
 		height = Math.pow(2, Math.ceil(Math.log(height) / Math.log(2)));
 
@@ -1592,11 +1572,15 @@ function Level(levelMap)
 		this.collisionBoxes.draw(context);
 
 		var player = this.parent.getObject("player_1");
-		var box = new Box(player.x - 10, player.y - 10, player.width + 20, player.height + 20);
 
-		box.draw(context, 'black');
+		var box = new Box(player.x, player.y, player.width, player.height);
 
-		var collisions = this.collisionBoxes.query(box);
+		/*var box = new Box(player.x + 7, player.y + player.height - 10, player.width - 13, 10);
+		  var box = new Box(player.x + 1, player.y + 8, player.width - 4, player.height - 18);*/
+
+		//box.draw(context, 'black');
+
+		var collisions = this.collisionBoxes.query(player.collisionBoxes);
 
 		for(var i = 0; i < collisions.length; i++) {
 			collisions[i].draw(context, 'red');
@@ -2138,9 +2122,28 @@ Box.prototype.draw = function(context, color)
 }
 
 
+function BoxArray()
+{
+  this.query = function(box)
+  {
+    var boxesInRange = [];
+
+    for(var i = 0; i < this.bucket.length; i++) {
+      if(box.intersects(this.bucket[i]))
+        boxesInRange.push(this.bucket[i]);
+    }
+
+    return boxesInRange;
+  }
+}
+
+
+BoxArray.prototype = Array.prototype;
+
+
 function QuadTree(parent, boundary)
 {
-  console.log("Created new QuadTree with boundary: ", boundary);
+  //console.log("Created new QuadTree with boundary: ", boundary);
 
   // Parent of this QuadTree
   this.parent = parent;
@@ -2170,6 +2173,14 @@ QuadTree.prototype.query = function(box, partials)
     partials = true;
 
   var boxesInRange = [];
+
+  // If box is actually an array of boxes, return all boxes
+  // (partially) within any of them.
+  if('length' in box) {
+    for(var i = 0; i < box.length; i++)
+      Array.prototype.push.apply(boxesInRange, this.query(box[i], partials));
+    return boxesInRange;
+  }
 
   if(!this.boundary.intersects(box))
     return boxesInRange;
@@ -2239,7 +2250,7 @@ QuadTree.prototype.redistribute = function()
   var oldBucket = this.bucket;
   this.bucket = [];
 
-  console.log("Redistributing " + oldBucket.length + " items");
+  //console.log("Redistributing " + oldBucket.length + " items");
 
   for(var i = 0; i < oldBucket.length; i++) {
     if(this.insert(oldBucket[i]))
@@ -3192,7 +3203,34 @@ function Player()
 		this.alive = true;
 		this.finished = false;
 
+		// Setup collision boxes for the player
+		this.collisionBoxes = new BoxArray();
+
+		this.boxBody = new Box(this.x + 1, this.y + 8, this.width - 4, this.height - 18);
+		this.boxLegs = new Box(this.x + 7, this.y + this.height - 10, this.width - 15, 10);
+
+		this.boxBody.type = 'body';
+		this.boxLegs.type = 'legs';
+
+		this.collisionBoxes.push(this.boxBody);
+		this.collisionBoxes.push(this.boxLegs);
+
 		this.events.push("RESTART");
+	}
+
+
+	this.updateCollisionBoxes = function()
+	{
+		this.boxBody.x = this.x + 1;
+		this.boxLegs.x = this.x + 5;
+
+		if(this.scale > 0) {
+			this.boxBody.y = this.y + 8;
+			this.boxLegs.y = this.y + this.height - 10;
+		} else {
+			this.boxBody.y = this.y + 12;
+			this.boxLegs.y = this.y;
+		}
 	}
 
 
@@ -3543,6 +3581,8 @@ function Player()
 		this.collideVerticalUp(level);
 		this.collideHorizontal(level);
 
+		this.updateCollisionBoxes();
+
 		if(oriX != this.x || oriY != this.y || this.events.count != 0)
 			this.sendPosition();
 	}
@@ -3636,6 +3676,13 @@ function Player()
 	}
 
 
+	this.drawDebugCollisionBoxes = function(context)
+	{
+		for(var i = 0; i < this.collisionBoxes.length; i++)
+			this.collisionBoxes[i].draw(context, 'black');
+	}
+
+
 	/**
 	 * Draw the correct sprite based on the current state of the player
 	 */
@@ -3643,12 +3690,18 @@ function Player()
 	{
 		var sprite = '';
 
+		// Draw debug boxes
+		if(this.getEngine().debugMode)
+			this.drawDebugCollisionBoxes(context);
+
+		// Flip player when gravity is inverted
 		if(this.alive) {
 			this.scale = lerp(this.scale, sign(this.gravity) == -1?-1:1, 0.5);
 		} else {
 			this.scale = lerp(this.scale, 0, 0.05);
 		}
 
+		// Show messages on death and finishing the level
 		if(!this.alive)
 			this.drawDeadMessage(context);
 

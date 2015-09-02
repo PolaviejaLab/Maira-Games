@@ -69,7 +69,34 @@ function Player()
 		this.alive = true;
 		this.finished = false;
 
+		// Setup collision boxes for the player
+		this.collisionBoxes = new BoxArray();
+
+		this.boxBody = new Box(this.x + 1, this.y + 8, this.width - 4, this.height - 18);
+		this.boxLegs = new Box(this.x + 7, this.y + this.height - 10, this.width - 15, 10);
+
+		this.boxBody.type = 'body';
+		this.boxLegs.type = 'legs';
+
+		this.collisionBoxes.push(this.boxBody);
+		this.collisionBoxes.push(this.boxLegs);
+
 		this.events.push("RESTART");
+	}
+
+
+	this.updateCollisionBoxes = function()
+	{
+		this.boxBody.x = this.x + 1;
+		this.boxLegs.x = this.x + 5;
+
+		if(this.scale > 0) {
+			this.boxBody.y = this.y + 8;
+			this.boxLegs.y = this.y + this.height - 10;
+		} else {
+			this.boxBody.y = this.y + 12;
+			this.boxLegs.y = this.y;
+		}
 	}
 
 
@@ -420,6 +447,8 @@ function Player()
 		this.collideVerticalUp(level);
 		this.collideHorizontal(level);
 
+		this.updateCollisionBoxes();
+
 		if(oriX != this.x || oriY != this.y || this.events.count != 0)
 			this.sendPosition();
 	}
@@ -513,6 +542,13 @@ function Player()
 	}
 
 
+	this.drawDebugCollisionBoxes = function(context)
+	{
+		for(var i = 0; i < this.collisionBoxes.length; i++)
+			this.collisionBoxes[i].draw(context, 'black');
+	}
+
+
 	/**
 	 * Draw the correct sprite based on the current state of the player
 	 */
@@ -520,12 +556,18 @@ function Player()
 	{
 		var sprite = '';
 
+		// Draw debug boxes
+		if(this.getEngine().debugMode)
+			this.drawDebugCollisionBoxes(context);
+
+		// Flip player when gravity is inverted
 		if(this.alive) {
 			this.scale = lerp(this.scale, sign(this.gravity) == -1?-1:1, 0.5);
 		} else {
 			this.scale = lerp(this.scale, 0, 0.05);
 		}
 
+		// Show messages on death and finishing the level
 		if(!this.alive)
 			this.drawDeadMessage(context);
 

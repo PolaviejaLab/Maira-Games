@@ -18,6 +18,9 @@ function Level(levelMap)
 	// Variable that contains canvas for drawing static level elements
 	this.staticLevelCanvas = document.createElement("canvas");
 
+	// Variable that contains collision geometry
+	this.collisionBoxes = undefined;
+
 	// Variable that contains coordinates and IDs for animated sprites
 	this.dynamicLevelGeometry = [];
 
@@ -232,15 +235,14 @@ function Level(levelMap)
 
 
 	/**
-	 *
+	 * Cache level geometry
 	 */
 	this.generateCollisionGeometry = function()
 	{
-		console.log("-- Generating collision geometry --");
-
 		var width = this.levelMap[0].length * 32;
 		var height = this.levelMap.length * 32;
 
+		// Find nearest power of two, to align bins with level grid
 		width = Math.pow(2, Math.ceil(Math.log(width) / Math.log(2)));
 		height = Math.pow(2, Math.ceil(Math.log(height) / Math.log(2)));
 
@@ -353,11 +355,15 @@ function Level(levelMap)
 		this.collisionBoxes.draw(context);
 
 		var player = this.parent.getObject("player_1");
-		var box = new Box(player.x - 10, player.y - 10, player.width + 20, player.height + 20);
 
-		box.draw(context, 'black');
+		var box = new Box(player.x, player.y, player.width, player.height);
 
-		var collisions = this.collisionBoxes.query(box);
+		/*var box = new Box(player.x + 7, player.y + player.height - 10, player.width - 13, 10);
+		  var box = new Box(player.x + 1, player.y + 8, player.width - 4, player.height - 18);*/
+
+		//box.draw(context, 'black');
+
+		var collisions = this.collisionBoxes.query(player.collisionBoxes);
 
 		for(var i = 0; i < collisions.length; i++) {
 			collisions[i].draw(context, 'red');
