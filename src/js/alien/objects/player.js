@@ -39,6 +39,7 @@ function Player()
 		// Position
 		this.x = this.baseX;
 		this.y = this.baseY;
+
 		this.faceRight = true;
 
 		// Velocities
@@ -70,33 +71,29 @@ function Player()
 		this.finished = false;
 
 		// Setup collision boxes for the player
-		this.collisionBoxes = new BoxArray();
-
-		this.boxBody = new Box(this.x + 1, this.y + 8, this.width - 4, this.height - 18);
-		this.boxLegs = new Box(this.x + 7, this.y + this.height - 10, this.width - 15, 10);
-
-		this.boxBody.type = 'body';
-		this.boxLegs.type = 'legs';
-
-		this.collisionBoxes.push(this.boxBody);
-		this.collisionBoxes.push(this.boxLegs);
+		this.setupCollider();
 
 		this.events.push("RESTART");
 	}
 
 
-	this.updateCollisionBoxes = function()
+	/**
+	 * Creates a collider
+	 */
+	this.setupCollider = function()
 	{
-		this.boxBody.x = this.x + 1;
-		this.boxLegs.x = this.x + 5;
+		// Create collider
+		this.addComponent("collider", new Collider());
 
-		if(this.scale > 0) {
-			this.boxBody.y = this.y + 8;
-			this.boxLegs.y = this.y + this.height - 10;
-		} else {
-			this.boxBody.y = this.y + 12;
-			this.boxLegs.y = this.y;
-		}
+		// Player body
+		var boxBody = new Box(1, 8, this.width - 4, this.height - 18);
+		boxBody.type = 'body';
+		this.getComponent("collider").push(boxBody);
+
+		// Player legs
+		var boxLegs = new Box(7, this.height - 10, this.width - 15, 10);
+		boxLegs.type = 'legs';
+		this.getComponent("collider").push(boxLegs);
 	}
 
 
@@ -447,8 +444,6 @@ function Player()
 		this.collideVerticalUp(level);
 		this.collideHorizontal(level);
 
-		this.updateCollisionBoxes();
-
 		if(oriX != this.x || oriY != this.y || this.events.count != 0)
 			this.sendPosition();
 	}
@@ -542,23 +537,12 @@ function Player()
 	}
 
 
-	this.drawDebugCollisionBoxes = function(context)
-	{
-		for(var i = 0; i < this.collisionBoxes.length; i++)
-			this.collisionBoxes[i].draw(context, 'black');
-	}
-
-
 	/**
 	 * Draw the correct sprite based on the current state of the player
 	 */
 	this.draw = function(context)
 	{
 		var sprite = '';
-
-		// Draw debug boxes
-		if(this.getEngine().debugMode)
-			this.drawDebugCollisionBoxes(context);
 
 		// Flip player when gravity is inverted
 		if(this.alive) {

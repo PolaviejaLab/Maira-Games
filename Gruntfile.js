@@ -16,7 +16,7 @@ module.exports = function(grunt) {
 
     concat: {
       alienjs: {
-        src: ["src/js/common/*.js", "src/js/alien/*.js", "src/js/alien/objects/*.js"],
+        src: ["src/js/common/*.js", "src/js/alien/*.js", "src/js/alien/components/*.js", "src/js/alien/objects/*.js"],
         dest: "src/js/build/alien.js",
         options: concat_options
       },

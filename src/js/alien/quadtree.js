@@ -111,6 +111,9 @@ QuadTree.prototype.query = function(box, partials)
 
   var boxesInRange = [];
 
+  if(box === undefined)
+    return boxesInRange;
+
   // If box is actually an array of boxes, return all boxes
   // (partially) within any of them.
   if('length' in box) {

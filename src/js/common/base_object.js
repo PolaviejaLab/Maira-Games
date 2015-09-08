@@ -11,6 +11,7 @@ function BaseObject()
 {
   this.parent = undefined;
   this.children = {};
+  this.components = {};
 }
 
 
@@ -98,6 +99,19 @@ BaseObject.prototype.addObject = function(name, object)
 
 
 /**
+ * Add a new component.
+ *
+ * @param {String} name - Name of the component object
+ * @param {ComponentObject} object - Component to be added
+ */
+BaseObject.prototype.addComponent = function(name, object)
+{
+  object.parent = this;
+  this.components[name] = object;
+};
+
+
+/**
  * Returns whether the object exists.
  *
  * @param {String} name - Name of the object.
@@ -110,6 +124,18 @@ BaseObject.prototype.hasObject = function(name)
 
 
 /**
+ * Return whether the component exists.
+ *
+ * @param {String} name - Name of the component.
+ * @returns {Boolean} True if the component exists, false otherwise.
+ */
+BaseObject.prototype.hasComponent = function(name)
+{
+  return name in this.component;
+};
+
+
+/**
  * Retreive a specific child object.
  *
  * @param {String} name - Name of the object to retreive
@@ -118,6 +144,18 @@ BaseObject.prototype.hasObject = function(name)
 BaseObject.prototype.getObject = function(name)
 {
 	return this.children[name];
+};
+
+
+/**
+ * Reteive a specific component object.
+ *
+ * @param {String} name - Name of the component to retreive
+ * @returns {Component} Returned component
+ */
+BaseObject.prototype.getComponent = function(name)
+{
+  return this.components[name];
 };
 
 
