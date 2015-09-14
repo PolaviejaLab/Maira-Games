@@ -19,6 +19,15 @@ function Game()
   this.engine = false;
   this.scroll = {x: 0, y: 0};
   this.deadzone = {w: 128};
+
+  // Connection responsible for saving data on server
+  this.sink = new Sink(server + "/sink.php?game=AG" +
+			"&session=" + options.gameId +
+			"&user=" + options.userId +
+			"&level=" + options.levelName +
+			"&debug=" + (options.debugMode?"true":"false"));
+
+  this.sink.transmitEvery = 20;
 }
 
 
