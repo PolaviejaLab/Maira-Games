@@ -42,6 +42,7 @@ function Rock()
   {
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
+    this.type = array.type;
   }
 
 
@@ -53,8 +54,30 @@ function Rock()
     this.x = this.baseX;
     this.y = this.baseY;
 
+    if(this.getComponent('collider') === undefined)
+    {
+      // Create collider
+      this.addComponent("collider", new Collider());
+
+      // Player body
+      var box = new Box(0, 0, this.width - 10, this.height - 14);
+      this.getComponent("collider").push(box);
+      this.updateCollider();
+    }
+
     // Find player
     this.player = this.parent.getObject("player_1");
+  }
+
+
+  this.updateCollider = function()
+  {
+    var collider = this.getComponent("collider");
+
+    for(var i = 0; i < collider.length; i++) {
+      collider[i].x = this.x + 5;
+      collider[i].y = this.y + 14;
+    }
   }
 
 
@@ -90,15 +113,15 @@ function Rock()
     var level = this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
-    var oriY = this.y + 10 + (dirY == 1) * (this.height - 20);
+    var oriY = this.y - 10 + (dirY == 1) * (this.height);
 
     /**
-     * Make sure hitting spikes or water causes the frog to touch the surface
+     * Make sure hitting spikes or water causes the rock to touch the surface
      */
     var callback = function(hit) {
       if(hit.type == 'water') {
-        hit.y += 24;
-        hit.dy += 24;
+        hit.y += 18; // 24;
+        hit.dy += 18; //24;
       }
       return hit;
     }
@@ -116,19 +139,15 @@ function Rock()
     this.velY += this.gravity;
     this.y += this.velY;
 
-    //this.height=16;
     var collision = collisionCheck({x: this.x, y: this.y, width: this.width, height:16}, this.player);
 
-    if(!collision)
-      return;    
-
     // Move when being pushed by the player
-    //  && Math.abs(collision.normal.x) < 5
-    if(collision.axis == 'x') {
-      if(push_key) {
-        this.x += collision.normal.x;
-      }
+    if(collision && collision.axis == 'x' && push_key) {
+      this.x += collision.normal.x;
     }
+
+    // Update collider after box position changed
+    this.updateCollider();
   }
 
 
@@ -140,6 +159,11 @@ function Rock()
   this.draw = function(context)
   {
     this.parent.spriteManager.drawSprite(context, this, this.sprite, 0);
+
+    if(this.getEngine().debugMode) {
+      var collider = this.getComponent("collider");
+      collider.draw(context);
+    }
   }
 }
 

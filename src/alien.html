@@ -277,7 +277,7 @@
 				var game = new Game();
 
 				game.spriteManager.loadFromSpriteTable(spriteTable,
-					function(left, total) {						
+					function(left, total) {
 						document.getElementById("progress-bar").style.width = (total-left)/total*100 + "%";
 					}).then(function() {
 						var main = game;
@@ -299,6 +299,7 @@
 			 	 		 * Initialize level and player objects
 			 	 		 */
 						loader.loadLevel(options.levelName).then(function(response) {
+							game.reset();
 							$("#loading-screen").fadeOut(500, function() {
 								$("#game-canvas").fadeIn(250);
 							});

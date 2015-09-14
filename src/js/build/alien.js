@@ -2224,6 +2224,12 @@ function Collider()
 
 Collider.prototype = Array.prototype;
 
+Collider.prototype.draw = function(context)
+{
+  for(var i = 0; i < this.length; i++)
+    this[i].draw(context);
+}
+
 // Source: src/js/alien/objects/bomb.js
 /** @module Alien **/
 /**
@@ -2837,11 +2843,15 @@ function Level(levelMap)
 	 */
 	this.sensor = function(origin, dir, length, func)
 	{
-		if(isNaN(origin.x) || isNaN(origin.y))
+		if(isNaN(origin.x) || isNaN(origin.y)) {
+			console.trace();
 			throw new Error("Sensor: Origin is set to NaN (" + origin.x + ", " + origin.y + ")");
+		}
 
-		if(isNaN(dir.x) || isNaN(dir.y))
+		if(isNaN(dir.x) || isNaN(dir.y)) {
+			console.trace();
 			throw new Error("Sensor: Direction is set to NaN (" + dir.x + ", " + dir.y + ")");
+		}
 
 		var o = this.worldToLevelCoords(origin);
 
@@ -3251,9 +3261,14 @@ Player.prototype.buildCollisionObjectList = function()
 
 	for(var i = 0; i < names.length; i++) {
 		var object = this.parent.getObject(names[i]);
+		var collider = object.getComponent("collider");
+
+		if(collider === undefined)
+			continue;
+
 		if(object.type == 'rock')
-			this.collisionObjects.push(object);
-		}
+			this.collisionObjects.push(object.getComponent("collider"));
+	}
 }
 
 
@@ -3296,7 +3311,9 @@ Player.prototype.reset = function()
 	this.finished = false;
 
 	// Setup collision boxes for the player
-	this.setupCollider();
+	if(this.getComponent('collider') === undefined)
+		this.setupCollider();
+
 	this.buildCollisionObjectList();
 
 	this.events.push("RESTART");
@@ -3523,6 +3540,16 @@ Player.prototype.sensorCallback = function(hit)
 
 /**************************************************************/
 
+Player.prototype.hitGround = function(sprite, type)
+{
+	this.velY = 0;
+	this.grounded = true;
+	this.jumping = false;
+
+	this.ground.slippery = isSlippery(sprite);
+	this.ground.type = type;
+}
+
 
 Player.prototype.collideVerticalDown = function(level)
 {
@@ -3566,12 +3593,7 @@ Player.prototype.collideVerticalDown = function(level)
 		}
 
 		this.y = combined.min.y - this.height;
-		this.velY = 0;
-		this.grounded = true;
-		this.jumping = false;
-
-		this.ground.slippery = isSlippery(combined.min.sprite);
-		this.ground.type = combined.min.type;
+		this.hitGround(combined.min.sprite, combined.min.type);
 	} else if(dirY < 0 && combined.max && combined.max.dy > -10) {
 		this.y = combined.max.y;
 		this.velY = 0;
@@ -3668,6 +3690,22 @@ Player.prototype.updateKinematics = function()
 	/** Resolve vertical collisions **/
 	this.collideVerticalDown(level);
 	this.collideVerticalUp(level);
+
+	for(var i = 0; i < this.collisionObjects.length; i++) {
+		var collider = this.collisionObjects[i];
+		var box = collider[0];
+
+		var collision = collisionCheck(this, box);
+
+		if(collision === false)
+			continue;
+
+		this.y += collision.normal.y;
+
+		this.hitGround(collider.parent.sprite, collider.parent.type);
+	}
+
+	/** Resolve sideways collisions **/
 	this.collideHorizontal(level);
 
 	if(oriX != this.x || oriY != this.y || this.events.count != 0)
@@ -3842,6 +3880,7 @@ function Rock()
   {
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
+    this.type = array.type;
   }
 
 
@@ -3853,8 +3892,30 @@ function Rock()
     this.x = this.baseX;
     this.y = this.baseY;
 
+    if(this.getComponent('collider') === undefined)
+    {
+      // Create collider
+      this.addComponent("collider", new Collider());
+
+      // Player body
+      var box = new Box(0, 0, this.width - 10, this.height - 14);
+      this.getComponent("collider").push(box);
+      this.updateCollider();
+    }
+
     // Find player
     this.player = this.parent.getObject("player_1");
+  }
+
+
+  this.updateCollider = function()
+  {
+    var collider = this.getComponent("collider");
+
+    for(var i = 0; i < collider.length; i++) {
+      collider[i].x = this.x + 5;
+      collider[i].y = this.y + 14;
+    }
   }
 
 
@@ -3890,15 +3951,15 @@ function Rock()
     var level = this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
-    var oriY = this.y + 10 + (dirY == 1) * (this.height - 20);
+    var oriY = this.y - 10 + (dirY == 1) * (this.height);
 
     /**
-     * Make sure hitting spikes or water causes the frog to touch the surface
+     * Make sure hitting spikes or water causes the rock to touch the surface
      */
     var callback = function(hit) {
       if(hit.type == 'water') {
-        hit.y += 24;
-        hit.dy += 24;
+        hit.y += 18; // 24;
+        hit.dy += 18; //24;
       }
       return hit;
     }
@@ -3916,19 +3977,15 @@ function Rock()
     this.velY += this.gravity;
     this.y += this.velY;
 
-    //this.height=16;
     var collision = collisionCheck({x: this.x, y: this.y, width: this.width, height:16}, this.player);
 
-    if(!collision)
-      return;    
-
     // Move when being pushed by the player
-    //  && Math.abs(collision.normal.x) < 5
-    if(collision.axis == 'x') {
-      if(push_key) {
-        this.x += collision.normal.x;
-      }
+    if(collision && collision.axis == 'x' && push_key) {
+      this.x += collision.normal.x;
     }
+
+    // Update collider after box position changed
+    this.updateCollider();
   }
 
 
@@ -3940,6 +3997,11 @@ function Rock()
   this.draw = function(context)
   {
     this.parent.spriteManager.drawSprite(context, this, this.sprite, 0);
+
+    if(this.getEngine().debugMode) {
+      var collider = this.getComponent("collider");
+      collider.draw(context);
+    }
   }
 }
 

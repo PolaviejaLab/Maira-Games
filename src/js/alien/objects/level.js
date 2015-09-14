@@ -82,11 +82,15 @@ function Level(levelMap)
 	 */
 	this.sensor = function(origin, dir, length, func)
 	{
-		if(isNaN(origin.x) || isNaN(origin.y))
+		if(isNaN(origin.x) || isNaN(origin.y)) {
+			console.trace();
 			throw new Error("Sensor: Origin is set to NaN (" + origin.x + ", " + origin.y + ")");
+		}
 
-		if(isNaN(dir.x) || isNaN(dir.y))
+		if(isNaN(dir.x) || isNaN(dir.y)) {
+			console.trace();
 			throw new Error("Sensor: Direction is set to NaN (" + dir.x + ", " + dir.y + ")");
+		}
 
 		var o = this.worldToLevelCoords(origin);
 

@@ -42,9 +42,14 @@ Player.prototype.buildCollisionObjectList = function()
 
 	for(var i = 0; i < names.length; i++) {
 		var object = this.parent.getObject(names[i]);
+		var collider = object.getComponent("collider");
+
+		if(collider === undefined)
+			continue;
+
 		if(object.type == 'rock')
-			this.collisionObjects.push(object);
-		}
+			this.collisionObjects.push(object.getComponent("collider"));
+	}
 }
 
 
@@ -87,7 +92,9 @@ Player.prototype.reset = function()
 	this.finished = false;
 
 	// Setup collision boxes for the player
-	this.setupCollider();
+	if(this.getComponent('collider') === undefined)
+		this.setupCollider();
+
 	this.buildCollisionObjectList();
 
 	this.events.push("RESTART");
@@ -314,6 +321,16 @@ Player.prototype.sensorCallback = function(hit)
 
 /**************************************************************/
 
+Player.prototype.hitGround = function(sprite, type)
+{
+	this.velY = 0;
+	this.grounded = true;
+	this.jumping = false;
+
+	this.ground.slippery = isSlippery(sprite);
+	this.ground.type = type;
+}
+
 
 Player.prototype.collideVerticalDown = function(level)
 {
@@ -357,12 +374,7 @@ Player.prototype.collideVerticalDown = function(level)
 		}
 
 		this.y = combined.min.y - this.height;
-		this.velY = 0;
-		this.grounded = true;
-		this.jumping = false;
-
-		this.ground.slippery = isSlippery(combined.min.sprite);
-		this.ground.type = combined.min.type;
+		this.hitGround(combined.min.sprite, combined.min.type);
 	} else if(dirY < 0 && combined.max && combined.max.dy > -10) {
 		this.y = combined.max.y;
 		this.velY = 0;
@@ -459,6 +471,22 @@ Player.prototype.updateKinematics = function()
 	/** Resolve vertical collisions **/
 	this.collideVerticalDown(level);
 	this.collideVerticalUp(level);
+
+	for(var i = 0; i < this.collisionObjects.length; i++) {
+		var collider = this.collisionObjects[i];
+		var box = collider[0];
+
+		var collision = collisionCheck(this, box);
+
+		if(collision === false)
+			continue;
+
+		this.y += collision.normal.y;
+
+		this.hitGround(collider.parent.sprite, collider.parent.type);
+	}
+
+	/** Resolve sideways collisions **/
 	this.collideHorizontal(level);
 
 	if(oriX != this.x || oriY != this.y || this.events.count != 0)
