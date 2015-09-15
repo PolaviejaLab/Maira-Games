@@ -3700,9 +3700,13 @@ Player.prototype.updateKinematics = function()
 		if(collision === false)
 			continue;
 
-		this.y += collision.normal.y;
-
-		this.hitGround(collider.parent.sprite, collider.parent.type);
+		if(collision.axis == 'x') {
+			this.x += collision.normal.x;
+			this.velX = 0;
+		} else {
+			this.y += collision.normal.y;
+			this.hitGround(collider.parent.sprite, collider.parent.type);
+		}
 	}
 
 	/** Resolve sideways collisions **/
