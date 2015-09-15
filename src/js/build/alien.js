@@ -2080,6 +2080,8 @@ var spriteTable = [
 	{key: 0x014F, src: 'sand/sandHalfRight', collision: 'topHalf'},
 
 	{key: 0x0115, src: 'sand/sand_liquid', collision: 'water'},
+	{key: 0x0116, src: 'sand/sand_petrified', collision: true},
+
 	{key: 0x0114, src: 'metalCenter', collision: true},
 
 	{key: 0x0204, src: 'water/no_waves2_top', frames: 7, collision: 'water'},
@@ -3851,6 +3853,8 @@ Player.prototype.draw = function(context)
  */
 function Rock()
 {
+  this.mode = 'rock';
+
   this.baseX = 0;
   this.baseY = 0;
 
@@ -3896,6 +3900,11 @@ function Rock()
     this.x = this.baseX;
     this.y = this.baseY;
 
+    this.width = 32;
+    this.height = 32;
+
+    this.mode = 'rock';
+
     if(this.getComponent('collider') === undefined)
     {
       // Create collider
@@ -3917,8 +3926,18 @@ function Rock()
     var collider = this.getComponent("collider");
 
     for(var i = 0; i < collider.length; i++) {
-      collider[i].x = this.x + 5;
-      collider[i].y = this.y + 14;
+      if(this.mode == 'rock')
+      {
+        collider[i].x = this.x + 5;
+        collider[i].y = this.y + 14;
+        collider[i].width = this.width - 10;
+        collider[i].height = this.height - 14;
+      } else {
+        collider[i].x = this.x;
+        collider[i].y = this.y;
+        collider[i].width = this.width;
+        collider[i].height = this.height;
+      }
     }
   }
 
@@ -3946,11 +3965,40 @@ function Rock()
   }
 
 
+  this.switchToGround = function(sx, sy)
+  {
+    var level = this.parent.getObject("level");
+    this.mode = 'ground';
+
+    // Find extents of quicksand
+    var mn_sx = sx;
+    var mx_sx = sx;
+
+    while(level.levelMap[sy][mx_sx + 1] == 277)
+      mx_sx += 1;
+
+    while(level.levelMap[sy][mn_sx - 1] == 277)
+      mn_sx -= 1;
+
+    // Grow rock
+    this.width = (mx_sx - mn_sx + 1) * 32;
+    this.height = 32;
+
+    this.x = mn_sx * 32;
+    this.y = sy * 32;
+
+    this.updateCollider();
+  }
+
+
   /**
    * Updates the rock
    */
   this.update = function(keyboard)
   {
+    if(this.mode != 'rock')
+      this.updateCollider();
+
     var push_key = keyboard.keys[keyboard.KEY_P];
     var level = this.parent.getObject("level");
 
@@ -3961,12 +4009,19 @@ function Rock()
      * Make sure hitting spikes or water causes the rock to touch the surface
      */
     var callback = function(hit) {
+
       if(hit.type == 'water') {
         hit.y += 18; // 24;
         hit.dy += 18; //24;
+
+        if(hit.sprite == 277) {
+          this.switchToGround(hit.sx, hit.sy);
+          return;
+        }
       }
+
       return hit;
-    }
+    }.bind(this);
 
     // Apply gravity
     var hit = level.sensor(
@@ -4000,7 +4055,11 @@ function Rock()
    */
   this.draw = function(context)
   {
-    this.parent.spriteManager.drawSprite(context, this, this.sprite, 0);
+    if(this.mode == 'rock') {
+      this.parent.spriteManager.drawSprite(context, this, this.sprite, 0);
+    } else {
+      this.parent.spriteManager.drawSprite(context, this, 0x0116, 0);
+    }
 
     if(this.getEngine().debugMode) {
       var collider = this.getComponent("collider");
