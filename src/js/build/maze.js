@@ -101,6 +101,16 @@ BaseObject.prototype.getObjectNames = function()
 
 
 /**
+ * Return array of component names.
+ */
+BaseObject.prototype.getComponentNames = function()
+{
+	return Object.keys(this.components);
+};
+
+
+
+/**
  * Add a child object.
  *
  * @param {String} name - Name of the child object

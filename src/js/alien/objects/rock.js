@@ -22,6 +22,9 @@ function Rock()
 
   this.sprite = 0;
 
+  /** This is a bug, the parent class should initialize this **/
+  this.components = {};
+
 
   /**
    * Serialize state to array

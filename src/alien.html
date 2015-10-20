@@ -192,9 +192,50 @@
 			<div id="spriteBox" class="col-lg-8"></div>
 		</div>
 
+		<!-- <pre id="tree"></pre> -->
 
 		<script>
+			/**
+			 * Debugging functions
+			 */
+			function spaces(n) {
+				var s = "";
+				for(var i = 0; i < n; i++)
+					s += " ";
+				return s;
+			}
+
+			function dumpComponents(object, level)
+			{
+				var html = "";
+				var names = object.getComponentNames();
+
+				for(var i = 0; i < names.length; i++) {
+					html += spaces(level) + "Component " + names[i] + "\n";
+				}
+
+				return html;
+			}
+
+			function dumpStructure(object, level)
+			{
+				var html = "";
+				var names = object.getObjectNames();
+
+				for(var i = 0; i < names.length; i++) {
+					html += spaces(level) + "Object " + names[i] + "\n";
+					var sub_object = object.getObject(names[i]);
+
+					html += dumpComponents(sub_object, level + 1);
+					html += dumpStructure(sub_object, level + 1);
+				}
+
+				return html;
+			}
+
+
 			$("#level-selector").hide();
+
 
 			(function() {
 				/**
@@ -303,6 +344,10 @@
 							$("#loading-screen").fadeOut(500, function() {
 								$("#game-canvas").fadeIn(250);
 							});
+
+							// Dump structure into PRE-element
+							// var tree = document.getElementById("tree")
+							// tree.innerHTML = "ROOT\n" + dumpStructure(game, 1);
 						}, function(error) {
 							console.log("loadLevel() failed " + error);
 
