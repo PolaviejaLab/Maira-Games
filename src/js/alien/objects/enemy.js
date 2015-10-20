@@ -19,6 +19,8 @@ function Enemy()
   this.gravity = 0.3;
   this.alive = true;
   this.aggressionLevel = 0;
+  this.killable = true;
+  this.flying = true;
 
   this.sprite = 0;
   this.frameCount = 1;
@@ -33,7 +35,8 @@ function Enemy()
       'y': this.y,
       'type': 'enemy',
       'sprite': this.sprite,
-      'aggressionLevel': this.aggressionLevel
+      'aggressionLevel': this.aggressionLevel,
+      'killable': this.killable
     };
   }
 
@@ -48,6 +51,8 @@ function Enemy()
 
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
+
+    //this.killable = array.killable;
   }
 
 
@@ -65,6 +70,27 @@ function Enemy()
     this.alive = true;
 
     this.frameCount = this.parent.spriteManager.getFrameCount(this.sprite);
+
+    /***
+     * This is a work-around and these properties should be available from
+     * within the editor instead.
+     */
+
+    // Ladybug is not killable and does not fly
+    if(this.sprite == 0x0A0A) {
+      this.flying = false;
+      this.killable = false;
+    }
+
+    // Bees cannot be killed
+    if(this.sprite == 0x0A03) {
+      this.killable = false;
+    }
+
+    // Flies and bats
+    if(this.sprite == 0x0A06 || this.sprite == 0x0A00) {
+      this.setAggressionLevel(1);
+    }
   }
 
 
@@ -101,6 +127,39 @@ function Enemy()
     this.sprite = sprite;
   }
 
+
+  this.updateGravity = function()
+  {
+    var level = this.parent.getObject("level");
+
+    var dirY = Math.sign(this.gravity);
+    var oriY = this.y + 10 + (dirY == 1) * (this.height - 20);
+
+    /**
+     * Make sure hitting spikes or water causes the enemy to touch the surface
+     */
+    var callback = function(hit) {
+      if(hit.type == 'water') {
+        hit.y += 24;
+        hit.dy += 24;
+      }
+      return hit;
+    }
+
+    var hit = level.sensor(
+      { x: this.x + this.width / 2, y: oriY },
+      { x: 0, y: dirY }, 256, callback);
+
+    if(dirY > 0 && hit && hit.dy < 10) {
+      this.y = hit.y - this.height;
+      this.velY = 0;
+    }
+
+    this.velY += this.gravity;
+    this.y += this.velY;
+  }
+
+
   /**
    * Updates the enemy; it is hunting the player
    */
@@ -134,6 +193,9 @@ function Enemy()
       this.y = lerp(this.y, this.targetY, 0.3);
     }
 
+    if(!this.flying)
+      this.updateGravity();
+
     /** Check collision with player **/
     var collision = collisionCheck(this, player);
     if(this.alive && collision) {
@@ -141,15 +203,17 @@ function Enemy()
         if(this.aggressionLevel != 0)
           player.kill("enemy");
       } else {
-        this.alive = false;
-        player.events.push("KILLED_ENEMY");
+        if(this.killable) {
+          this.alive = false;
+          player.events.push("KILLED_ENEMY");
 
-        // Reset rotation
-        this.rotation = 0;
+          // Reset rotation
+          this.rotation = 0;
 
-        // Player kills the bee, make sure it falls with the same speed
-        // as the player, otherwise the player will pass it.
-        this.velY = player.velY;
+          // Player kills the bee, make sure it falls with the same speed
+          // as the player, otherwise the player will pass it.
+          this.velY = player.velY;
+        }
       }
     }
   }
@@ -160,33 +224,7 @@ function Enemy()
    */
   this.updateDying = function()
   {
-    var level = this.parent.getObject("level");
-
-    var dirY = Math.sign(this.gravity);
-    var oriY = this.y + 10 + (dirY == 1) * (this.height - 20);
-
-    /**
-     * Make sure hitting spikes or water causes the enemy to touch the surface
-     */
-    var callback = function(hit) {
-      if(hit.type == 'water') {
-        hit.y += 24;
-        hit.dy += 24;
-      }
-      return hit;
-    }
-
-    var hit = level.sensor(
-      { x: this.x + this.width / 2, y: oriY },
-      { x: 0, y: dirY }, 256, callback);
-
-    if(dirY > 0 && hit && hit.dy < 10) {
-      this.y = hit.y - this.height;
-      this.velY = 0;
-    }
-
-    this.velY += this.gravity;
-    this.y += this.velY;
+    this.updateGravity();
 
     this.rotation = lerp(this.rotation, Math.PI, 0.025);
   }
