@@ -48,7 +48,7 @@ Player.prototype.buildCollisionObjectList = function()
 			continue;
 
 		if(object.type == 'rock')
-			this.collisionObjects.push(object.getComponent("collider"));
+			this.collisionObjects.push(collider);
 	}
 }
 

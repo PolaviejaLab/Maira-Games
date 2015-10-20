@@ -33,6 +33,7 @@ function LevelLoader(game)
           this.setLevelBounds(level);
           this.game.addObject('level', level);
 
+          // Creating objects
           for(var i = 0; i < data.objects.length; i++) {
             var object = data.objects[i];
 
