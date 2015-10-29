@@ -2034,6 +2034,22 @@ var spriteTable = [
 	{key: 0x010F, src: 'grass/grassHalf_mid', collision: 'topHalf'},
 	{key: 0x0110, src: 'grass/grassHalf_right', collision: 'topHalf'},
 
+	{key: 0x0151, src: 'grass/grassLeft_down', collision: true},
+	{key: 0x0152, src: 'grass/grassMid_down', collision: true},
+	{key: 0x0153, src: 'grass/grassRight_down', collision: true},
+	{key: 0x0154, src: 'grass/grassCenter_down', collision: true},
+	//{key: 0x0105, src: 'grass/grassCliff_left', collision: true},
+	//{key: 0x0106, src: 'grass/grassCliff_right', collision: true},
+	//{key: 0x0107, src: 'grass/grassCliffAlt_left', collision: true},
+	//{key: 0x0108, src: 'grass/grassCliffAlt_right', collision: true},
+	{key: 0x0159, src: 'grass/grassCorner_left_down', collision: true},
+	{key: 0x015A, src: 'grass/grassCorner_right_down', collision: true},
+	{key: 0x015B, src: 'grass/grassHill_left_down', collision: true},
+	{key: 0x015C, src: 'grass/grassHill_right_down', collision: true},
+	//{key: 0x010D, src: 'grass/grassHalf', collision: 'topHalf'},
+	//{key: 0x010E, src: 'grass/grassHalf_left', collision: 'topHalf'},
+	//{key: 0x010F, src: 'grass/grassHalf_mid', collision: 'topHalf'},
+	//{key: 0x0110, src: 'grass/grassHalf_right', collision: 'topHalf'},
 
 	/* Snow */
 	{key: 0x0120, src: 'snow/snowLeft', collision: true},
@@ -2089,6 +2105,9 @@ var spriteTable = [
 	{key: 0x014D, src: 'sand/sandHalfLeft', collision: 'topHalf'},
 	{key: 0x014E, src: 'sand/sandHalfMid', collision: 'topHalf'},
 	{key: 0x014F, src: 'sand/sandHalfRight', collision: 'topHalf'},
+
+	{key: 0x0161, src: 'sand/sandMid_down', collision: true},
+
 
 	{key: 0x0115, src: 'sand/sand_liquid', collision: 'water'},
 	{key: 0x0116, src: 'sand/sand_petrified', collision: true},
@@ -2154,9 +2173,23 @@ var spriteTable = [
 	{key: 0x0A0E, src: 'worm/wormGreen', frames: 2, collision: true, type: 'worm'},
 	{key: 0x0A0F, src: 'worm/wormGreen_dead', collision: true, toolbox: false},
 
-	{key: 0x0A10, src: 'slime/snakeSlime', collision: true, toolbox: false},
-	{key: 0x0A11, src: 'slime/snakeSlime_ani', collision: true, toolbox: false},
-	{key: 0x0A12, src: 'slime/snakeSlime_dead', collision: true, toolbox: false},
+	{key: 0x0A10, src: 'snake/snakeSlime', collision: true, toolbox: false},
+	{key: 0x0A11, src: 'snake/snakeSlime_ani', collision: true, toolbox: false},
+	{key: 0x0A12, src: 'snake/snakeSlime_dead', collision: true, toolbox: false},
+
+	{key: 0x0A13, src: 'worm/wormRed', frames: 2, collision: true, type: 'worm'},
+	{key: 0x0A14, src: 'worm/wormRed_dead', collision: true, toolbox: false},
+
+	{key: 0x0A15, src: 'snake/snakeLava', collision: true, toolbox: false},
+	{key: 0x0A16, src: 'snake/snakeLava_ani', collision: true, toolbox: false},
+	{key: 0x0A17, src: 'snake/snakeLava_dead', collision: true, toolbox: false},
+
+	{key: 0x0A22, src: 'worm/wormYellow', frames: 2, collision: true, type: 'worm'},
+	{key: 0x0A23, src: 'worm/wormYellow_dead', collision: true, toolbox: false},
+
+	{key: 0x0A24, src: 'snake/snakeYellow', collision: true, toolbox: false},
+	{key: 0x0A25, src: 'snake/snakeYellow_ani', collision: true, toolbox: false},
+	{key: 0x0A26, src: 'snake/snakeYellow_dead', collision: true, toolbox: false},
 
 	{key: 0x0A1A, src: 'frog/frog', collision: true, type: 'frog'},
 	{key: 0x0A1B, src: 'frog/frog_move', collision: true, toolbox: false},
@@ -2164,6 +2197,9 @@ var spriteTable = [
 
 	{key: 0x0A20, src: 'snail/snail', frames: 2, collision: true, type: 'snail'},
 	//{key: 0x0A21, src: 'snail/snail', frames: 2, collision: true, type: 'snail'},
+
+
+
 ];
 
 // Source: src/js/alien/toolbox.js
@@ -4412,7 +4448,7 @@ function Worm()
       var height = lerp(this.height, this.transformHeight, 0.4);
       this.y += (this.height - height);
       this.height = height;
-      this.parent.spriteManager.drawSprite(context, this, 0x0A10, 0);
+      this.parent.spriteManager.drawSprite(context, this, this.sprite + 2, 0);
     } else {
       var height = lerp(this.height, 32, 0.1);
       this.y += (this.height - height);

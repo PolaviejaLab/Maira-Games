@@ -156,7 +156,7 @@ function Worm()
       var height = lerp(this.height, this.transformHeight, 0.4);
       this.y += (this.height - height);
       this.height = height;
-      this.parent.spriteManager.drawSprite(context, this, 0x0A10, 0);
+      this.parent.spriteManager.drawSprite(context, this, this.sprite + 2, 0);
     } else {
       var height = lerp(this.height, 32, 0.1);
       this.y += (this.height - height);
