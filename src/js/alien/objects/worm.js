@@ -23,6 +23,8 @@ function Worm()
   this.alive = true;
   this.transform = false;
 
+  this.maxHeight = Infinity;
+
 
   /**
    * Serialize state to array
@@ -33,7 +35,8 @@ function Worm()
       'x': this.x,
       'y': this.y,
       'type': 'worm',
-      'sprite': this.sprite
+      'sprite': this.sprite,
+      'maxHeight': this.maxHeight
     };
   }
 
@@ -45,6 +48,7 @@ function Worm()
   {
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
+    this.setMaxHeight(array.maxHeight);
   }
 
 
@@ -80,6 +84,17 @@ function Worm()
 		this.baseX = x;
 		this.baseY = y;
 	}
+
+
+  /**
+   * Set maximum height of the worm
+   *
+   * @param {number} maxHeight - Maximum height
+   */
+  this.setMaxHeight = function(maxHeight)
+  {
+    this.maxHeight = maxHeight;
+  }
 
 
   /**

@@ -68,6 +68,12 @@ var constructors = {
 		var snail = new Snail();
 		snail.fromArray(array);
 		return snail;
+	},
+
+	'switch': function(array) {
+		var sw = new Switch();
+		sw.fromArray(array);
+		return sw;
 	}
 };
 
@@ -212,9 +218,9 @@ var spriteTable = [
 	{key: 0x0701, src: 'bomb', collision: true, type: 'bomb'},
 	{key: 0x0702, src: 'rock', collision: true, type: 'rock'},
 	{key: 0x0703, src: 'weight', collision: true},
-	{key: 0x0704, src: 'switchRight', collision: false},
-	{key: 0x0705, src: 'switchMid', collision: false},
-	{key: 0x0706, src: 'switchLeft', collision: false},
+	{key: 0x0704, src: 'switchRight', collision: false, type: 'switch'},
+	{key: 0x0705, src: 'switchMid', collision: false, type: 'switch'},
+	{key: 0x0706, src: 'switchLeft', collision: false, type: 'switch'},
 
 	{key: 0x0901, src: 'numbers/1', collision: true},
 	{key: 0x0902, src: 'numbers/2', collision: true},

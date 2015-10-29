@@ -2,10 +2,10 @@
 "use strict";
 
 /**
- * Creates new enemy object.
+ * Creates new rock object.
  *
  * @class
- * @classdesc Object representing an enemy in the alien girl game.
+ * @classdesc Object representing an rock in the alien girl game.
  */
 function Rock()
 {
