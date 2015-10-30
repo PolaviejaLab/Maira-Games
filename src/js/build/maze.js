@@ -28,6 +28,7 @@ function BaseObject()
   this.parent = undefined;
   this.children = {};
   this.components = {};
+  this.properties = [];
 }
 
 

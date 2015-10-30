@@ -23,8 +23,24 @@ function Worm()
   this.alive = true;
   this.transform = false;
 
-  this.maxHeight = Infinity;
+  this.maxHeight = 7;
 
+  this.properties = [
+    { 'caption': 'MaxHeight', 'type': 'select',
+      'options': [
+        { 'value': 1 * 32, 'caption': '1 block' },
+        { 'value': 2 * 32, 'caption': '2 blocks' },
+        { 'value': 3 * 32, 'caption': '3 blocks' },
+        { 'value': 4 * 32, 'caption': '4 blocks' },
+        { 'value': 5 * 32, 'caption': '5 blocks' },
+        { 'value': 6 * 32, 'caption': '6 blocks' },
+        { 'value': 7 * 32, 'caption': '7 blocks' },
+        { 'value': 8 * 32, 'caption': '8 blocks' },
+        { 'value': 9 * 32, 'caption': '9 blocks' }
+      ],
+      'set': function(maxHeight) { this.setMaxHeight(maxHeight); }.bind(this),
+      'get': function() { return this.maxHeight; }.bind(this)
+    }];
 
   /**
    * Serialize state to array
@@ -150,6 +166,9 @@ function Worm()
         player.kill("worm/" + this.name);
       } else {
         var distanceY = this.y + this.height - player.y;
+
+        if(distanceY > this.maxHeight)
+          distanceY = this.maxHeight;
 
         this.transform = true;
         this.transformHeight = (distanceY>32)?distanceY:32;

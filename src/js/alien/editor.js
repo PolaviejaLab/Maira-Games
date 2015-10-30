@@ -153,6 +153,8 @@ Editor.prototype.mouseMove = function(event)
 			if(inBox(coords.x, coords.y, object)) {
 				this.selectedObject = object;
 
+				this.setupOptions();
+
 				if(event.detail.buttons & 1) {
 					this.dragging = true;
 
@@ -196,6 +198,72 @@ Editor.prototype.mouseMove = function(event)
 			this.game.getObject("level").setSprite(coords, 0);
 	}
 }
+
+
+/**
+ * Adds options
+ */
+Editor.prototype.setupOptions = function()
+{
+	var node = document.getElementById('options');
+
+	// Remove children
+	while(node.firstChild) {
+	    node.removeChild(node.firstChild);
+	}
+
+	// Add options
+	var properties = this.selectedObject.properties;
+	for(var i = 0; i < properties.length; i++) {
+		var property = properties[i];
+
+		var label = document.createElement('label');
+		label.innerHTML = properties[i].caption;
+
+		if(property.type == 'select') {
+			var select = document.createElement('select');
+
+			for(var j = 0; j < property.options.length; j++) {
+				var option = document.createElement('option');
+				option.value = property.options[j].value;
+				option.innerHTML = property.options[j].caption;
+
+				select.appendChild(option);
+			}
+
+			select.value = property.get();
+
+			select.onchange = function(event) {
+				this.set(event.target.value);
+			}.bind(property);
+
+			node.appendChild(label);
+			node.appendChild(document.createElement('br'));
+			node.appendChild(select);
+		} else if(property.type == 'boolean') {
+			var input = document.createElement('input');
+			input.type = 'checkbox';
+			input.checked = property.get();
+			node.appendChild(input);
+			node.appendChild(label);
+
+			input.onchange = function(event) {
+				this.set(event.target.checked);
+			}.bind(property);
+		} else {
+			var input = document.createElement('input');
+			input.type = 'text';
+			input.value = property.get();
+
+			node.appendChild(label);
+			node.appendChild(input);
+		}
+
+		node.appendChild(document.createElement('br'));
+	}
+	//<label>Height:</label> <input type="text" style="width: 50px;">-->
+}
+
 
 
 /**

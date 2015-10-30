@@ -25,6 +25,27 @@ function Enemy()
   this.sprite = 0;
   this.frameCount = 1;
 
+  this.properties = [
+    { 'caption': 'Killable', 'type': 'boolean',
+      'set': function(killable) { this.killable = killable; }.bind(this),
+      'get': function() { return this.killable; }.bind(this)
+    },
+    { 'caption': 'Flying', 'type': 'boolean',
+      'set': function(flying) { this.flying = flying; }.bind(this),
+      'get': function() { return this.flying; }.bind(this)
+    },
+    {
+      'caption': 'Aggression',
+      'type': 'select',
+      'options': [
+        { 'value': 0, 'caption': 'Not aggressive', },
+        { 'value': 1, 'caption': 'Aggressive' }
+      ],
+      'set': function(aggression) { this.setAggressionLevel(aggression); }.bind(this),
+      'get': function() { return this.aggressionLevel; }.bind(this)
+    }
+  ];
+
   /**
    * Serialize state to array
    */

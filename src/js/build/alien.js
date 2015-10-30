@@ -28,6 +28,7 @@ function BaseObject()
   this.parent = undefined;
   this.children = {};
   this.components = {};
+  this.properties = [];
 }
 
 
@@ -896,6 +897,8 @@ Editor.prototype.mouseMove = function(event)
 			if(inBox(coords.x, coords.y, object)) {
 				this.selectedObject = object;
 
+				this.setupOptions();
+
 				if(event.detail.buttons & 1) {
 					this.dragging = true;
 
@@ -939,6 +942,72 @@ Editor.prototype.mouseMove = function(event)
 			this.game.getObject("level").setSprite(coords, 0);
 	}
 }
+
+
+/**
+ * Adds options
+ */
+Editor.prototype.setupOptions = function()
+{
+	var node = document.getElementById('options');
+
+	// Remove children
+	while(node.firstChild) {
+	    node.removeChild(node.firstChild);
+	}
+
+	// Add options
+	var properties = this.selectedObject.properties;
+	for(var i = 0; i < properties.length; i++) {
+		var property = properties[i];
+
+		var label = document.createElement('label');
+		label.innerHTML = properties[i].caption;
+
+		if(property.type == 'select') {
+			var select = document.createElement('select');
+
+			for(var j = 0; j < property.options.length; j++) {
+				var option = document.createElement('option');
+				option.value = property.options[j].value;
+				option.innerHTML = property.options[j].caption;
+
+				select.appendChild(option);
+			}
+
+			select.value = property.get();
+
+			select.onchange = function(event) {
+				this.set(event.target.value);
+			}.bind(property);
+
+			node.appendChild(label);
+			node.appendChild(document.createElement('br'));
+			node.appendChild(select);
+		} else if(property.type == 'boolean') {
+			var input = document.createElement('input');
+			input.type = 'checkbox';
+			input.checked = property.get();
+			node.appendChild(input);
+			node.appendChild(label);
+
+			input.onchange = function(event) {
+				this.set(event.target.checked);
+			}.bind(property);
+		} else {
+			var input = document.createElement('input');
+			input.type = 'text';
+			input.value = property.get();
+
+			node.appendChild(label);
+			node.appendChild(input);
+		}
+
+		node.appendChild(document.createElement('br'));
+	}
+	//<label>Height:</label> <input type="text" style="width: 50px;">-->
+}
+
 
 
 /**
@@ -2439,6 +2508,27 @@ function Enemy()
 
   this.sprite = 0;
   this.frameCount = 1;
+
+  this.properties = [
+    { 'caption': 'Killable', 'type': 'boolean',
+      'set': function(killable) { this.killable = killable; }.bind(this),
+      'get': function() { return this.killable; }.bind(this)
+    },
+    { 'caption': 'Flying', 'type': 'boolean',
+      'set': function(flying) { this.flying = flying; }.bind(this),
+      'get': function() { return this.flying; }.bind(this)
+    },
+    {
+      'caption': 'Aggression',
+      'type': 'select',
+      'options': [
+        { 'value': 0, 'caption': 'Not aggressive', },
+        { 'value': 1, 'caption': 'Aggressive' }
+      ],
+      'set': function(aggression) { this.setAggressionLevel(aggression); }.bind(this),
+      'get': function() { return this.aggressionLevel; }.bind(this)
+    }
+  ];
 
   /**
    * Serialize state to array
@@ -4486,8 +4576,24 @@ function Worm()
   this.alive = true;
   this.transform = false;
 
-  this.maxHeight = Infinity;
+  this.maxHeight = 7;
 
+  this.properties = [
+    { 'caption': 'MaxHeight', 'type': 'select',
+      'options': [
+        { 'value': 1 * 32, 'caption': '1 block' },
+        { 'value': 2 * 32, 'caption': '2 blocks' },
+        { 'value': 3 * 32, 'caption': '3 blocks' },
+        { 'value': 4 * 32, 'caption': '4 blocks' },
+        { 'value': 5 * 32, 'caption': '5 blocks' },
+        { 'value': 6 * 32, 'caption': '6 blocks' },
+        { 'value': 7 * 32, 'caption': '7 blocks' },
+        { 'value': 8 * 32, 'caption': '8 blocks' },
+        { 'value': 9 * 32, 'caption': '9 blocks' }
+      ],
+      'set': function(maxHeight) { this.setMaxHeight(maxHeight); }.bind(this),
+      'get': function() { return this.maxHeight; }.bind(this)
+    }];
 
   /**
    * Serialize state to array
@@ -4556,6 +4662,7 @@ function Worm()
    */
   this.setMaxHeight = function(maxHeight)
   {
+    console.log(this.maxHeight);
     this.maxHeight = maxHeight;
   }
 
@@ -4613,6 +4720,11 @@ function Worm()
         player.kill("worm/" + this.name);
       } else {
         var distanceY = this.y + this.height - player.y;
+
+        console.log(this.maxHeight, distanceY);
+
+        if(distanceY > this.maxHeight)
+          distanceY = this.maxHeight;
 
         this.transform = true;
         this.transformHeight = (distanceY>32)?distanceY:32;
