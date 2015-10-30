@@ -72,6 +72,8 @@ Player.prototype.reset = function()
 	this.speedSnow = 7.0;
 
 	this.jumping = false;
+	this.jump_key_released = false;
+	this.super_jumping = false;
 	this.grounded = false;
 
 	this.ground = { slippery: false, type: true }
@@ -200,6 +202,7 @@ Player.prototype.getPermittedActions = function()
 		walk_on_water: code == 1,
 		walk_upside_down: code == 3 || code == 1,
 		fly: code == 2,
+		super_jump: true
 	};
 }
 
@@ -219,7 +222,15 @@ Player.prototype.handleInput = function(input)
 			this.jumping = true;
 			this.grounded = false;
 			this.velY = -sign(this.gravity) * this.speedDefault * 2;
+			this.jump_key_released = false;
 		}
+
+		if(this.jumping && permitted.super_jump && !this.super_jumping && this.jump_key_released) {
+			this.super_jumping = true;
+			this.velY = -sign(this.gravity) * this.speedDefault * 2;
+		}
+	} else {
+		this.jump_key_released = true;
 	}
 
 	// Flip gravity if up and down are pressed at the same time
@@ -326,6 +337,7 @@ Player.prototype.hitGround = function(sprite, type)
 	this.velY = 0;
 	this.grounded = true;
 	this.jumping = false;
+	this.super_jumping = false;
 
 	this.ground.slippery = isSlippery(sprite);
 	this.ground.type = type;

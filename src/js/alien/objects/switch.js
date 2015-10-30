@@ -129,11 +129,12 @@ function Switch()
     var collision = collisionCheck({x: this.x, y: this.y, width: this.width, height:16}, this.player);
 
     // Switch when key is pressed by the player
+    if(!push_key)
+      this.key_state = false;
+
     if(collision && push_key && !this.key_state) {
       this.sprite = (this.sprite + 1) % this.states.length;
       this.key_state = true;
-    } else {
-      this.key_state = false;
     }
   }
 
