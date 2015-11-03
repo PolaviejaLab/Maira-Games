@@ -2,12 +2,12 @@
 "use strict";
 
 /**
- * Creates new platform object.
+ * Creates new block switch object.
  *
  * @class
- * @classdesc Object representing a platform in the alien girl game.
+ * @classdesc Object representing a block switch in the alien girl game.
  */
-function Platform()
+function HitSwitch()
 {
   this.baseX = 0;
   this.baseY = 0;
@@ -16,23 +16,14 @@ function Platform()
   this.height = 32;
 
   this.sprite = 0;
+  this.state = false;
 
   /** This is a bug, the parent class should initialize this **/
   this.components = {};
 
-  this.direction = 'R';
   this.controlGroup = 0;
-  this.distance = 1;
 
   this.properties = [
-    { 'caption': 'Direction', 'type': 'select',
-      'options': [
-        { 'value': 'L', 'caption': 'Left' },
-        { 'value': 'R', 'caption': 'Right' }
-      ],
-      'set': function(direction) { this.setDirection(direction); }.bind(this),
-      'get': function() { return this.direction; }.bind(this)
-    },
     {
       'caption': 'ControlGroup', 'type': 'select',
       'options': [
@@ -42,32 +33,7 @@ function Platform()
       ],
       'set': function(controlGroup) { this.setControlGroup(controlGroup); }.bind(this),
       'get': function() { return this.controlGroup; }.bind(this)
-    },
-    {
-      'caption': 'Distance', 'type': 'select',
-      'options': [
-        { 'value': '1', 'caption': '1 Block' },
-        { 'value': '2', 'caption': '2 Blocks' },
-        { 'value': '3', 'caption': '3 Blocks' },
-        { 'value': '4', 'caption': '4 Blocks' },
-      ],
-      'set': function(distance) { this.setDistance(distance); }.bind(this),
-      'get': function() { return this.distance; }.bind(this)
     }];
-
-
-  this.setDirection = function(direction)
-  {
-    if(direction !== undefined)
-      this.direction = direction;
-  }
-
-
-  this.setDistance = function(distance)
-  {
-    if(distance !== undefined)
-      this.distance = parseInt(distance);
-  }
 
 
   this.setControlGroup = function(controlGroup)
@@ -76,41 +42,21 @@ function Platform()
 
     if(controlGroup !== undefined) {
       if(engine !== undefined)
-        engine.removeActorFromControlGroup(this.controlGroup, this);
+        engine.removeSensorFromControlGroup(this.controlGroup, this);
 
       this.controlGroup = parseInt(controlGroup);
 
       if(engine !== undefined) {
-        engine.addActorToControlGroup(this.controlGroup, this);
+        engine.addSensorToControlGroup(this.controlGroup, this);
       }
     }
   }
 
 
-  this.setState = function(state)
+  this.isActive = function()
   {
-    if(state) {
-      if(this.direction == 'L') {
-        this.x = this.baseX - 32 * this.distance;
-        this.y = this.baseY;
-      } else {
-        this.x = this.baseX;
-        this.y = this.baseY;
-      }
-
-      this.width = this.distance * 32 + 32;
-      this.height = 32;
-    } else {
-      this.x = this.baseX;
-      this.y = this.baseY;
-
-      this.width = 32;
-      this.height = 32;
-    }
-
-    this.updateCollider();
+    return this.state;
   }
-
 
   /**
    * Serialize state to array
@@ -120,9 +66,7 @@ function Platform()
     return {
       'x': this.x,
       'y': this.y,
-      'type': 'platform',
-      'direction': this.direction,
-      'distance': this.distance,
+      'type': 'hitswitch',
       'controlGroup': this.controlGroup,
       'sprite': this.sprite
     };
@@ -136,9 +80,7 @@ function Platform()
   {
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
-    this.setDirection(array.direction);
     this.setControlGroup(array.controlGroup);
-    this.setDistance(array.distance);
     this.type = array.type;
   }
 
@@ -153,6 +95,8 @@ function Platform()
 
     this.width = 32;
     this.height = 32;
+
+    this.state = false;
 
     if(this.getComponent('collider') === undefined)
     {
@@ -178,10 +122,10 @@ function Platform()
     var collider = this.getComponent("collider");
 
     for(var i = 0; i < collider.length; i++) {
-        collider[i].x = this.x;
-        collider[i].y = this.y;
-        collider[i].width = this.width;
-        collider[i].height = this.height;
+        collider[i].x = this.x + 4;
+        collider[i].y = this.y + 4;
+        collider[i].width = this.width - 8;
+        collider[i].height = this.height - 8;
     }
   }
 
@@ -210,11 +154,18 @@ function Platform()
 
 
   /**
-   * Updates the rock
+   * Updates the hit switch
    */
   this.update = function(keyboard)
   {
-    var collision = collisionCheck({x: this.x, y: this.y, width: this.width, height:16}, this.player);
+    var collision = collisionCheck({x: this.x, y: this.y, width: this.width, height: this.height}, this.player);
+
+    if(collision) {
+      this.state = true;
+
+      var engine = this.getEngine();
+      engine.updateControlGroupsState();
+    }
 
     // Update collider after box position changed
     this.updateCollider();
@@ -242,4 +193,4 @@ function Platform()
   }
 }
 
-Platform.prototype = new BaseObject();
+HitSwitch.prototype = new BaseObject();

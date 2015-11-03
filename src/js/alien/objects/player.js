@@ -16,7 +16,7 @@ function Player()
 	this.type = 'player';
 
 	this.baseX = 0;
-	this.baseY = 0;	
+	this.baseY = 0;
 
 	this.sensor_left = 6;
 	this.sensor_right = 23;
@@ -47,7 +47,9 @@ Player.prototype.buildCollisionObjectList = function()
 		if(collider === undefined)
 			continue;
 
-		if(object.type == 'rock' || object.type == 'platform')
+		if(object.type == 'rock' ||
+			 object.type == 'platform' ||
+			 object.type == 'hitswitch')
 			this.collisionObjects.push(collider);
 	}
 }
@@ -72,7 +74,6 @@ Player.prototype.reset = function()
 	this.speedSnow = 7.0;
 
 	this.jumping = false;
-	this.jump_key_released = false;
 	this.super_jumping = false;
 	this.grounded = false;
 
@@ -200,9 +201,9 @@ Player.prototype.getPermittedActions = function()
 
 	return {
 		walk_on_water: code == 1,
-		walk_upside_down: code == 3 || code == 1,
 		fly: code == 2,
-		super_jump: true
+		walk_upside_down: code == 3,
+		super_jump: code == 4,
 	};
 }
 
@@ -222,15 +223,14 @@ Player.prototype.handleInput = function(input)
 			this.jumping = true;
 			this.grounded = false;
 			this.velY = -sign(this.gravity) * this.speedDefault * 2;
-			this.jump_key_released = false;
 		}
+	}
 
-		if(this.jumping && permitted.super_jump && !this.super_jumping && this.jump_key_released) {
+	if(input.keys[input.KEY_UP]) {
+		if(this.jumping && permitted.super_jump && !this.super_jumping) {
 			this.super_jumping = true;
 			this.velY = -sign(this.gravity) * this.speedDefault * 2;
 		}
-	} else {
-		this.jump_key_released = true;
 	}
 
 	// Flip gravity if up and down are pressed at the same time

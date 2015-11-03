@@ -70,7 +70,7 @@ function Switch()
       if(engine !== undefined)
         engine.removeSensorFromControlGroup(this.controlGroup, this);
 
-      this.controlGroup = controlGroup;
+      this.controlGroup = parseInt(controlGroup);
 
       if(engine !== undefined)
         engine.addSensorToControlGroup(this.controlGroup, this);

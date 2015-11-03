@@ -109,7 +109,7 @@ function Worm()
    */
   this.setMaxHeight = function(maxHeight)
   {
-    this.maxHeight = maxHeight;
+    this.maxHeight = parseInt(maxHeight);
   }
 
 

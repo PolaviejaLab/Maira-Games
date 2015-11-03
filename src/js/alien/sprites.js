@@ -76,6 +76,12 @@ var constructors = {
 		return sw;
 	},
 
+	'hitswitch': function(array) {
+		var sw = new HitSwitch();
+		sw.fromArray(array);
+		return sw;
+	},
+
 	'platform': function(array) {
 		var pl = new Platform();
 		pl.fromArray(array);
@@ -279,4 +285,6 @@ var spriteTable = [
 
 
 	{key: 0x110F, src: 'grass/grassHalf_mid', collision: 'topHalf', type: 'platform'},
+
+	{key: 0x2161, src: 'sand/sandMid_down', collision: true, type: 'hitswitch'},
 ];

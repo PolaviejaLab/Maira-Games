@@ -115,6 +115,18 @@ Editor.prototype.generateName = function(base)
 
 
 /**
+ * Called by container, aligns selected element
+ */
+Editor.prototype.alignSelected = function()
+{
+	if(this.selectedObject) {
+		this.selectedObject.x = Math.round(this.selectedObject.x / 32) * 32;
+		this.selectedObject.y = Math.round(this.selectedObject.y / 32) * 32;
+	}
+}
+
+
+/**
  * Called on mouse movement, paints active sprite when
  * moving the mouse while holding the left button. Removes
  * the sprite when moving the mouse while holding the right button.
