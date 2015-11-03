@@ -16,12 +16,67 @@ function Switch()
   this.height = 32;
 
   this.sprite = 0;
+  this.baseSprite = 0;
 
   this.velY = 0;
   this.gravity = 0.3;
 
   this.states = [0x0704, 0x705, 0x706, 0x705];
   this.key_state = false;
+
+  this.activeState = 0x704;
+  this.controlGroup = 0;
+
+
+  this.properties = [
+    { 'caption': 'ActiveState', 'type': 'select',
+      'options': [
+        { 'value': 0x704, 'caption': 'Left' },
+        { 'value': 0x705, 'caption': 'Middle' },
+        { 'value': 0x706, 'caption': 'Right' }
+      ],
+      'set': function(activeState) { this.setActiveState(activeState); }.bind(this),
+      'get': function() { return this.activeState; }.bind(this)
+    },
+    {
+      'caption': 'ControlGroup', 'type': 'select',
+      'options': [
+        { 'value': 0, 'caption': 0 },
+        { 'value': 1, 'caption': 1 },
+        { 'value': 2, 'caption': 2 },
+      ],
+      'set': function(controlGroup) { this.setControlGroup(controlGroup); }.bind(this),
+      'get': function() { return this.controlGroup; }.bind(this)
+    }];
+
+
+  this.isActive = function() {
+    return this.activeState == this.states[this.sprite];
+  }
+
+
+  this.setActiveState = function(activeState)
+  {
+    if(activeState !== undefined)
+      this.activeState = activeState;
+  }
+
+
+  this.setControlGroup = function(controlGroup)
+  {
+    var engine = this.getEngine();
+
+    if(controlGroup !== undefined) {
+      if(engine !== undefined)
+        engine.removeSensorFromControlGroup(this.controlGroup, this);
+
+      this.controlGroup = controlGroup;
+
+      if(engine !== undefined)
+        engine.addSensorToControlGroup(this.controlGroup, this);
+    }
+  }
+
 
   /**
    * Serialize state to array
@@ -32,7 +87,9 @@ function Switch()
       'x': this.x,
       'y': this.y,
       'type': 'switch',
-      'sprite': this.states[this.sprite]
+      'sprite': this.states[this.sprite],
+      'controlGroup': this.controlGroup,
+      'activeState': this.activeState
     };
   }
 
@@ -44,6 +101,8 @@ function Switch()
   {
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
+    this.setActiveState(array.activeState);
+    this.setControlGroup(array.controlGroup);
     this.type = array.type;
   }
 
@@ -59,8 +118,13 @@ function Switch()
     this.width = 32;
     this.height = 32;
 
+    this.sprite = this.baseSprite;
+
     // Find player
     this.player = this.parent.getObject("player_1");
+
+    // Add switch to control group; engine might not have been defined before
+    this.setControlGroup(this.controlGroup);
   }
 
 
@@ -89,8 +153,10 @@ function Switch()
   this.setBaseSprite = function(sprite)
   {
     for(var i = 0; i < this.states.length; i++)
-      if(this.states[i] == sprite)
+      if(this.states[i] == sprite) {
+        this.baseSprite = i;
         this.sprite = i;
+      }
   }
 
 
@@ -135,6 +201,9 @@ function Switch()
     if(collision && push_key && !this.key_state) {
       this.sprite = (this.sprite + 1) % this.states.length;
       this.key_state = true;
+
+      var engine = this.getEngine();
+      engine.updateControlGroupsState();
     }
   }
 

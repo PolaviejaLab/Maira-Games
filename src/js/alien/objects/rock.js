@@ -5,7 +5,7 @@
  * Creates new rock object.
  *
  * @class
- * @classdesc Object representing an rock in the alien girl game.
+ * @classdesc Object representing a rock in the alien girl game.
  */
 function Rock()
 {

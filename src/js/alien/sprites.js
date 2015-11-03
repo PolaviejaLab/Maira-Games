@@ -74,6 +74,12 @@ var constructors = {
 		var sw = new Switch();
 		sw.fromArray(array);
 		return sw;
+	},
+
+	'platform': function(array) {
+		var pl = new Platform();
+		pl.fromArray(array);
+		return pl;
 	}
 };
 
@@ -272,5 +278,5 @@ var spriteTable = [
 	//{key: 0x0A21, src: 'snail/snail', frames: 2, collision: true, type: 'snail'},
 
 
-
+	{key: 0x110F, src: 'grass/grassHalf_mid', collision: 'topHalf', type: 'platform'},
 ];

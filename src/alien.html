@@ -189,7 +189,7 @@
 					<td>
 						<canvas id="game-canvas" class="center-block"></canvas>
 					</td>
-					<td><div class="options" style="width: 150px">
+					<td><div id="options" class="options" style="width: 150px">
 						<span id="header">Options</span>
 
 						<div id="options">
@@ -321,8 +321,11 @@
 				/**
 				 * Hide menu bar when playing the game
 				 */
-				if(!options.editMode)
+				if(!options.editMode) {
 					$("nav").hide();
+					$("#options").hide();
+				}
+
 
 				/**
 				 * Initialize game

@@ -17,6 +17,24 @@ function BaseObject()
 
 
 /**
+ * Returns the name of the present object
+ */
+BaseObject.prototype.getName = function()
+{
+    if(this.parent === undefined)
+      return "root";
+
+    for(var key in this.parent.children)
+    {
+      if(this.parent.children[key] == this)
+        return key;
+    }
+
+    return "unknown";
+}
+
+
+/**
  * Reset object to its initiail state
  */
 BaseObject.prototype.reset = function()

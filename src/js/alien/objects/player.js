@@ -16,7 +16,7 @@ function Player()
 	this.type = 'player';
 
 	this.baseX = 0;
-	this.baseY = 0;
+	this.baseY = 0;	
 
 	this.sensor_left = 6;
 	this.sensor_right = 23;
@@ -47,7 +47,7 @@ Player.prototype.buildCollisionObjectList = function()
 		if(collider === undefined)
 			continue;
 
-		if(object.type == 'rock')
+		if(object.type == 'rock' || object.type == 'platform')
 			this.collisionObjects.push(collider);
 	}
 }

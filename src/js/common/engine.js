@@ -8,6 +8,90 @@
  */
 function Engine()
 {
+	this.controlGroups = {};
+}
+
+
+/**
+ * Returns the controlGroup identified by the specified controlGroupId
+ */
+Engine.prototype.getControlGroup = function(controlGroupId)
+{
+	if(!(controlGroupId in this.controlGroups)) {
+		this.controlGroups[controlGroupId] = {
+			'sensors': {},
+			'actors': {},
+			'active': false
+		};
+	}
+
+	return this.controlGroups[controlGroupId];
+}
+
+
+/**
+ * Adds a sensor to a control group
+ */
+Engine.prototype.addSensorToControlGroup = function(controlGroupId, sensor)
+{
+	var controlGroup = this.getControlGroup(controlGroupId);
+	var name = sensor.getName();
+
+	if(!(name in controlGroup.sensors)) {
+		controlGroup.sensors[name] = sensor;
+	}
+}
+
+
+Engine.prototype.removeSensorFromControlGroup = function(controlGroupId, sensor)
+{
+	var controlGroup = this.getControlGroup(controlGroupId);
+	var name = sensor.getName();
+
+	if(name in controlGroup.sensors)
+		delete controlGroup.sensors[name];
+}
+
+
+/**
+ * Adds and actor to a control group
+ */
+Engine.prototype.addActorToControlGroup = function(controlGroupId, actor)
+{
+	var controlGroup = this.getControlGroup(controlGroupId);
+	var name = actor.getName();
+
+	if(!(name in controlGroup.actors)) {
+		controlGroup.actors[name] = actor;
+	}
+}
+
+
+Engine.prototype.removeActorFromControlGroup = function(controlGroupId, actor)
+{
+	var controlGroup = this.getControlGroup(controlGroupId);
+	var name = actor.getName();
+
+	if(name in controlGroup.actors)
+		delete controlGroup.actors[name];
+}
+
+
+Engine.prototype.updateControlGroupsState = function()
+{
+	for(var key in this.controlGroups) {
+		// Determine state of sensors / control group
+		var state = true;
+
+		for(var sensor in this.controlGroups[key].sensors) {
+			state &= this.controlGroups[key].sensors[sensor].isActive();
+		}
+
+		// Activate actors
+		for(var actor in this.controlGroups[key].actors) {
+			this.controlGroups[key].actors[actor].setState(state);
+		}
+	}
 }
 
 
