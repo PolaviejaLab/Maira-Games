@@ -86,6 +86,12 @@ var constructors = {
 		var pl = new Platform();
 		pl.fromArray(array);
 		return pl;
+	},
+
+	'door': function(array) {
+		var door = new Door();
+		door.fromArray(array);
+		return door;
 	}
 };
 
@@ -214,12 +220,13 @@ var spriteTable = [
 	{key: 0x0304, src: 'cactus', collision: false},
 
 	{key: 0x0401, src: 'spikes', collision: 'water'},
-	{key: 0x0402, src: 'doorOpen', collision: 'Door'},
-	{key: 0x0403, src: 'doorOpenTop', collision: false},
+	{key: 0x0402, src: 'doorOpen', collision: false, type: 'door' },
+	{key: 0x0403, src: 'doorOpenTop', collision: false, type: 'door', toolbox: false },
+	{key: 0x0404, src: 'doorClosed', collision: false, type: 'door', toolbox: false },
+	{key: 0x0405, src: 'doorClosedTop', collision: false, type: 'door', toolbox: false },
 
-	{key: 0x0404, src: 'springboardDown', collision: 'boardDown'},
-	{key: 0x0405, src: 'springboardUp', collision: 'boardUp'},
-
+	{key: 0x0410, src: 'springboardDown', collision: 'boardDown'},
+	{key: 0x0411, src: 'springboardUp', collision: 'boardUp'},
 
 	{key: 0x0504, src: 'signRight', collision: false},
 	{key: 0x0505, src: 'signExit', collision: 'exit'},
