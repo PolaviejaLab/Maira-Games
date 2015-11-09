@@ -5,22 +5,29 @@
  * Object representing the player in the maze game
  * @class
  */
-function Player()
+function Player(options)
 {
 	// Depends on sprite
 	this.width = 32;
 	this.height = 46;
 
-	var sessionId = parseInt(gameStart).toString(36 | 0).toUpperCase();
+	var sessionId = parseInt(options.gameStart).toString(36 | 0).toUpperCase();
 
-	this.sink = new Sink(datasink + "?game=MG&session=" + sessionId + "&level=" + playerId + "&user=" + userId + "&debug=false");
-
+	this.sink = new Sink(datasink +
+		"?game=MG&session=" + sessionId +
+		"&level=" + options.playerId +
+		"&user=" + options.userId +
+		"&debug=false");
 
 	/**
 	 * Sets up the player object
 	 */
 	this.reset = function()
 	{
+		// Copy wall and space width from parent
+		this.widthwall = this.parent.widthwall;
+		this.widthspace = this.parent.widthspace;
+
 		// Find player start position
 		var level = this.parent.getObject("level");
 
@@ -129,20 +136,20 @@ function Player()
 		var x, y, w, h;
 
 		if(this.x % 2 == 0){
-			x = this.x*(widthspace+widthwall)/2;
-			w = widthwall;
+			x = this.x*(this.widthspace+this.widthwall)/2;
+			w = this.widthwall;
 		}
 		else{
-			x = (this.x-1)*(widthspace+widthwall)/2 + widthwall;
-			w = widthspace;
+			x = (this.x-1)*(this.widthspace+this.widthwall)/2 + this.widthwall;
+			w = this.widthspace;
 		}
 		if(this.y % 2 == 0){
-			y = this.y*(widthspace+widthwall)/2;
-			h = widthwall;
+			y = this.y*(this.widthspace+this.widthwall)/2;
+			h = this.widthwall;
 		}
 		else{
-			y = (this.y-1)*(widthspace+widthwall)/2 + widthwall;
-			h = widthspace;
+			y = (this.y-1)*(this.widthspace+this.widthwall)/2 + this.widthwall;
+			h = this.widthspace;
 		}
 
 		context.save();

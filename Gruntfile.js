@@ -22,7 +22,7 @@ module.exports = function(grunt) {
       },
 
       mazejs: {
-        src: ["src/js/common/*.js", "src/js/maze/*.js"],
+        src: ["src/js/common/*.js", "src/js/maze/*.js", "src/js/maze/levels/*.js"],
         dest: "src/js/build/maze.js",
         options: concat_options
       }

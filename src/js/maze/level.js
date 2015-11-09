@@ -8,9 +8,11 @@
  */
 function Level(level)
 {
-	// Server to load levels from
 	//this.server = "http://www.ivarclemens.nl/platform_game/ldb/";
 
+	/**
+	 * Select the correct level
+	 */
 	this.levelMap = [[3]];
 
 	switch(level) {
@@ -27,6 +29,10 @@ function Level(level)
 	 */
 	this.reset = function()
 	{
+		// Copy wall and space width from parent
+		this.widthwall = this.parent.widthwall;
+		this.widthspace = this.parent.widthspace;
+
 		this.bombImage = new Image();
 		this.bombImage.src = "images/bomb.png";
 
@@ -34,8 +40,8 @@ function Level(level)
 			var bounds = {
 					x: 0,
 					y: 0,
-					width: (this.getWidth()-1)/2 * widthspace +  (this.getWidth()+1)/2 * widthwall,
-					height: (this.getHeight()-1)/2 * widthspace +  (this.getHeight()+1)/2 * widthwall
+					width: (this.getWidth()-1)/2 * this.widthspace +  (this.getWidth()+1)/2 * this.widthwall,
+					height: (this.getHeight()-1)/2 * this.widthspace +  (this.getHeight()+1)/2 * this.widthwall
 				};
 			this.game.setLevelBounds(bounds);
 
@@ -59,19 +65,19 @@ function Level(level)
 				var x, y, w, h;
 
 				if(j % 2 == 0) {
-					x = j*(widthspace+widthwall)/2;
-					w = widthwall;
+					x = j*(this.widthspace+this.widthwall)/2;
+					w = this.widthwall;
 				}	else {
-					x = (j-1)*(widthspace+widthwall)/2 + widthwall;
-					w = widthspace;
+					x = (j-1)*(this.widthspace+this.widthwall)/2 + this.widthwall;
+					w = this.widthspace;
 				}
 
 				if(i % 2 == 0) {
-					y = i*(widthspace+widthwall)/2;
-					h = widthwall;
+					y = i*(this.widthspace+this.widthwall)/2;
+					h = this.widthwall;
 				} else {
-					y = (i-1)*(widthspace+widthwall)/2 + widthwall;
-					h = widthspace;
+					y = (i-1)*(this.widthspace+this.widthwall)/2 + this.widthwall;
+					h = this.widthspace;
 				}
 
 				context.fillStyle = '#FFFFFF';
