@@ -1,0 +1,17 @@
+body {
+  margin: 0px;
+  padding: 0px;
+}
+
+#button {
+  padding: 10px;
+}
+
+#game-canvas {
+  border: 1px solid gray;
+  display: none;
+}
+
+#player-error {
+  display: none;
+}

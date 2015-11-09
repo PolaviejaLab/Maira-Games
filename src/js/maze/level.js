@@ -6,20 +6,19 @@
  *
  * @class
  */
-function Level()
+function Level(level)
 {
 	// Server to load levels from
 	//this.server = "http://www.ivarclemens.nl/platform_game/ldb/";
 
 	this.levelMap = [[3]];
 
-	var level = parseInt(getQueryField("player"));
-
 	switch(level) {
 		case 0: this.levelMap = example; break;
 		case 1: this.levelMap = level1; break;
 		case 2: this.levelMap = level2; break;
 		case 3: this.levelMap = level3; break;
+		case 4: this.levelMap = leveltr; break;
 	}
 
 
