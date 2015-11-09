@@ -112,6 +112,8 @@ function Controls()
 			return false;
 		}
 
+    var widthwall = this.parent.widthwall;
+    var widthspace = this.parent.widthspace;
 		var width = (widthspace + widthwall);
 
 		// Compute age of last touch event
@@ -155,6 +157,8 @@ function Controls()
 		if(event.detail.type == 'mouse' && event.detail.buttons != 1)
 			return false;
 
+    var widthwall = this.parent.widthwall;
+    var widthspace = this.parent.widthspace;
 		var width = (widthspace + widthwall);
 
 		// Compute position in grid

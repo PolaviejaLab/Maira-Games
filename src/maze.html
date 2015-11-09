@@ -10,6 +10,7 @@
 
 		<script>
 			var datasink = "http://maira-server.champalimaud.pt/games/backend/sink.php";
+			var server = "http://maira-server.champalimaud.pt/games/backend/";
 		</script>
 
 		<script src="js/vendor/jquery-2.1.3.min.js"></script>
@@ -20,7 +21,7 @@
 			{
 				var updates = {
 					user: $("#user-id").val(),
-					player: $("#level-list").val(),
+					level: $("#level-list").val(),
 					control: $("#control-mode").val()
 				};
 
@@ -57,15 +58,8 @@
 
 						<div class="form-group">
 							<label for="level-name">Level</label>
-							<select id="level-list" class="form-control">
-								<option value="0">Practise level</option>
-								<option value="1">Level 1</option>
-								<option value="2">Level 2</option>
-								<option value="3">Level 3</option>
-								<option value="4">Level TR</option>
-							</select>
+							<select id="level-list" class="form-control" name="level-selector"></select>
 						</div>
-
 
 						<div class="form-group">
 							<label>Control mode</label>
@@ -95,32 +89,29 @@
 		<script>
 			var canvas_id = "game-canvas";
 
-			var gameStart = false;
-			var playerId = false;
-			var userId = false;
-			var controlMode = "direction";
-
 			(function() {
-				gameStart = getQueryField("game");
-				playerId = getQueryField("player");
-				userId = getQueryField("user");
-				controlMode = getQueryField("control");
 
-				$("#game-id").text(parseInt(gameStart).toString(36 | 0).toUpperCase());
-				$("#user-id").val(userId);
-				$("#level-list").val(playerId);
-				$("#control-mode").val(controlMode);
+				var options = {
+					gameStart: getQueryField("game"),
+					levelName: getQueryField("level"),
+					userId: getQueryField("user"),
+					controlMode: getQueryField("control")
+				};
 
-				var levelNr = parseInt(getQueryField("player"));
+				$("#game-id").text(parseInt(options.gameStart).toString(36 | 0).toUpperCase());
+				$("#user-id").val(options.userId);
+				$("#control-mode").val(options.controlMode);
+
+				updateLevelSelector("#level-list", options.levelName);
 
 				// If the game has not been assigned an identifier yet, do so now
-				if(!gameStart) {
-					gameStart = Math.floor(Date.now() / 1000);
-					window.location.href = updateQueryString({game: gameStart});
+				if(!options.gameStart) {
+					options.gameStart = Math.floor(Date.now() / 1000);
+					window.location.href = updateQueryString({game: options.gameStart});
 					return;
 				}
 
-				if(!playerId || !userId || !gameStart) {
+				if(!options.levelName || !options.userId || !options.gameStart) {
 					$("#player-error").show();
 					return;
 				}
@@ -129,17 +120,11 @@
 				$("#game-canvas").show();
 
 				var engine = new Engine();
-				var game = new Game(options);
+				var game = new Game();
 
 				engine.initializeEngine(canvas_id, 1230, 729.5, game);
 
-				var options = {
-					gameStart: gameStart,
-					playerId: playerId,
-					userId: userId
-				};
-
-				var level = new Level(levelNr);
+				var level = new Level(options.levelName);
 				game.addObject("level", level);
 				game.addObject("player", new Player(options));
 				game.addObject("controls", new Controls());

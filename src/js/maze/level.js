@@ -8,20 +8,34 @@
  */
 function Level(level)
 {
-	//this.server = "http://www.ivarclemens.nl/platform_game/ldb/";
-
-	/**
-	 * Select the correct level
-	 */
+	this.server = "http://maira-server.champalimaud.pt/games/backend/";
 	this.levelMap = [[3]];
 
-	switch(level) {
-		case 0: this.levelMap = example; break;
-		case 1: this.levelMap = level1; break;
-		case 2: this.levelMap = level2; break;
-		case 3: this.levelMap = level3; break;
-		case 4: this.levelMap = leveltr; break;
+
+	this.getLevelFromServer = function(name)
+	{
+		return new Promise(function(resolve, reject) {
+			if(typeof(server) == 'undefined' || !server)
+				reject();
+
+			jQuery.ajax({
+				url: server + "mldb/get_level.php?name=" + name,
+				dataType: 'json'
+			}).done(function(data) {
+				resolve(data);
+			}).fail(function(response) {
+				console.log(response);
+				reject(response.responseText);
+			});
+		});
 	}
+
+
+	this.getLevelFromServer(level).then(function(level) {
+		this.levelMap = level.level;
+
+		this.parent.reset();
+	}.bind(this));
 
 
 	/**
