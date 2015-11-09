@@ -4013,6 +4013,11 @@ function Platform()
         { 'value': '2', 'caption': '2 Blocks' },
         { 'value': '3', 'caption': '3 Blocks' },
         { 'value': '4', 'caption': '4 Blocks' },
+        { 'value': '5', 'caption': '5 Blocks' },
+        { 'value': '6', 'caption': '6 Blocks' },
+        { 'value': '7', 'caption': '7 Blocks' },
+        { 'value': '8', 'caption': '8 Blocks' },
+        { 'value': '9', 'caption': '9 Blocks' },
       ],
       'set': function(distance) { this.setDistance(distance); }.bind(this),
       'get': function() { return this.distance; }.bind(this)
