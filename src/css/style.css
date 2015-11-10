@@ -1,0 +1,228 @@
+
+#participant_id
+{
+  font-size: 18pt;
+  margin-bottom: 10px;
+}
+
+/*****************************************
+ * Base layout (header, content, footer) *
+ *****************************************/
+
+html,
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  margin: 0px;
+  padding: 0px;
+  height: 100%;
+}
+
+div#wrapper {
+  min-height: 100%;
+  position: relative;
+}
+
+div#header {
+}
+
+div#content {
+  padding-left: 50px;
+  padding-right: 50px;
+
+  padding-top: 150px;
+
+  padding-bottom: 50px;
+  clear: both;
+}
+
+div#footer {
+  position: absolute;
+  clear: both;
+  /*height: 100px;*/
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+}
+
+
+div#error {
+  display: none;
+  background-color: rgb(136, 0, 21);
+  padding: 10px;
+  color: white;
+  border-bottom: 2px solid black;
+}
+
+div.Demographics p#instructions {
+  /** font-size: 150%; **/
+  font-weight: bold;
+}
+
+/**********************
+ * Navigation buttons *
+ **********************/
+
+div.buttons {
+  padding: 15px;
+}
+
+button.navigation {
+  width: 145px;
+  height: 55px;
+
+  font-variant: small-caps;
+
+  border: 1px solid #204D74;
+  color: white;
+  background-color: #606060;
+  cursor: pointer;
+  padding: 6px 12px;
+  font-size: 22px;
+
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+button.navigation.enabled,
+button.navigation.enabled {
+  background-color: #337AB7;
+}
+
+button.navigation.enabled:hover,
+button.navigation.enabled:hover {
+  background-color: #286090;
+}
+
+button.navigation:hover {
+    background-color: #606060;
+}
+
+button#button_next {
+  float: right;
+}
+
+
+/*********************
+ * Title and balance *
+ *********************/
+
+
+div#title {
+  float: left;
+  vertical-align: middle;
+
+  /** T L B R **/
+  margin: 15px 15px 10px 15px;
+
+  position: absolute;
+  left: 0px;
+}
+
+div#title > h1 {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-variant: small-caps;
+  font-weight: bold;
+}
+
+div#title > h2 {
+  margin-top: 0px;
+  font-variant: small-caps;
+}
+
+div#balance_box {
+  margin: 10px;
+
+  border: 2px solid #600000;
+  font-size: 30pt;
+  font-weight: bold;
+
+  width: 200px;
+  text-align: center;
+
+  float: right;
+
+  position: absolute;
+  right: 0px;
+ }
+
+div#balance_box > .small {
+  font-size: 15pt;
+  font-weight: normal;
+}
+
+div#balance_box > span {
+  display: block;
+}
+
+
+/********
+ * Misc *
+ ********/
+
+.navbar {
+  background-color: #EFEFEF;
+  border-bottom: 1px solid black;
+  margin-bottom: 0px;
+}
+
+
+.navbar .dropdown-item {
+  display: block;
+  padding: 3px;
+}
+
+.navbar .dropdown-item:hover {
+  background-color: #EFEFEF;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/***
+ *
+ */
+div.TextScreen {
+  width: 80%;
+
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 20px;
+
+  font-size: 14pt;
+}
+
+
+.start_screen {
+  text-align: center;
+}
+
+.start_screen h1 {
+  padding-top: 200px;
+}
+
+#button_start {
+  width: 200px;
+  height: 50px;
+
+  border: 1px solid #204D74;
+  color: white;
+  background-color: #606060;
+
+  border-radius: 10px;
+  font-size: 22pt;
+}
+
+#button_start:hover {
+  background-color: #606060;
+}
+
+#button_start.enabled {
+  background-color: #337AB7;
+}
+
+#button_start.enabled:hover {
+  background-color: #286090;
+}

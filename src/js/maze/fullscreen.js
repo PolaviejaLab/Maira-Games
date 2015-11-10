@@ -20,8 +20,18 @@ document.addEventListener('keydown', function(e) {
  * Create onFullScreenEnter event when entering fullscreen
  */
 function onFullScreenEnter() {
+  var elem = document.querySelector("#fullscreen");
+
+  if(!elem) {
+    console.log("Could not find element");
+    return;
+  }
+
+  elem.onfullscreenchange = onFullScreenExit;
   elem.onwebkitfullscreenchange = onFullScreenExit;
   elem.onmozfullscreenchange = onFullScreenExit;
+
+  console.log("Entering full screen");
 
   var event = new CustomEvent("onFullScreenEnter", {
     bubbles: false,
@@ -62,17 +72,12 @@ function enterFullscreen() {
   elem.onmozfullscreenchange = onFullScreenEnter;
   elem.onfullscreenchange = onFullScreenEnter;
 
-  if (elem.webkitRequestFullscreen) {
-    elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-  } else {
-    if (elem.mozRequestFullScreen) {
-      elem.mozRequestFullScreen();
-    } else {
-      elem.requestFullscreen();
-    }
-  }
+  requestFullscreen(elem);
 
-  document.getElementById('enter-exit-fs').onclick = exitFullscreen;
+  var button = document.getElementById('enter-exit-fs');
+
+  if(button !== null)
+    button.onclick = exitFullscreen;
 }
 
 
@@ -80,6 +85,84 @@ function enterFullscreen() {
  * Explicitly exit fullscreen mode
  */
 function exitFullscreen() {
-  document.cancelFullScreen();
-  document.getElementById('enter-exit-fs').onclick = enterFullscreen;
+  exitFullscreen();
+
+  var button = document.getElementById('enter-exit-fs');
+
+  if(button !== null)
+    button.onclick = enterFullscreen;
+}
+
+
+/**
+ * Displays element fullscreen and fulfills promise when done.
+ */
+function requestFullscreen(elem)
+{
+  return new Promise(function(resolve, reject) {
+
+    var fullscreenchange = function() {
+      elem.onfullscreenchange = null;
+      if(isFullscreen())
+        resolve();
+      else
+        reject(Error("element.requestFullscreen() failed"));
+    }
+
+    elem.onfullscreenchange = fullscreenchange
+    elem.onwebkitfullscreenchange = fullscreenchange;
+    elem.onmozfullscreenchange = fullscreenchange;
+
+    var fullscreenerror = function() {
+      reject(Error("element.requestFullscreen() failed"));
+    }
+
+    elem.onfullscreenerror = fullscreenerror;
+    elem.onwebkitfullscreenerror = fullscreenerror;
+    elem.onmozfullscreenerror = fullscreenerror;
+
+    var promise = undefined;
+
+    if(elem.requestFullscreen)
+      promise = elem.requestFullscreen();
+    else if(elem.mozRequestFullScreen)
+      promise = elem.mozRequestFullScreen();
+    else if(elem.webkitRequestFullscreen)
+      promise = elem.webkitRequestFullscreen();
+    else if(elem.msRequestFullscreen)
+      promise = elem.msRequestFullscreen();
+    else
+      reject(Error("element.requestFullscreen() is not supported"));
+
+    if(promise !== undefined)
+      promise.then(function() { resolve(); });
+  });
+}
+
+
+/**
+ * Stops document's fullscreen element from being displayed
+ * fullscreen and fulfills promise when done.
+ */
+function exitFullscreen()
+{
+  if(document.exitFullscreen)
+    return document.exitFullscreen();
+  if(document.mozCancelFullscreen)
+    return document.mozCancelFullscreen();
+  if(document.webkitExitFullscreen)
+    return document.webkitExitFullscreen();
+  if(document.msExitFullscreen)
+    return document.msExitFullscreen();
+
+  return new Promise(function(resolve, reject) {
+    reject(Error("element.exitFullscreen() is not supported"));
+  });
+}
+
+
+function isFullscreen()
+{
+  return document.mozFullScreen ||
+         document.webkitIsFullScreen;
 }

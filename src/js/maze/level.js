@@ -15,19 +15,19 @@ function Level(level)
 	this.getLevelFromServer = function(name)
 	{
 		return new Promise(function(resolve, reject) {
-			if(typeof(server) == 'undefined' || !server)
-				reject();
+			if(typeof(this.server) == 'undefined' || !this.server)
+				reject("Server is undefined");
 
 			jQuery.ajax({
-				url: server + "mldb/get_level.php?name=" + name,
+				url: this.server + "mldb/get_level.php?name=" + name,
 				dataType: 'json'
 			}).done(function(data) {
 				resolve(data);
 			}).fail(function(response) {
-				console.log(response);
+				console.log("Could not load level", response);
 				reject(response.responseText);
 			});
-		});
+		}.bind(this));
 	}
 
 
@@ -35,7 +35,9 @@ function Level(level)
 		this.levelMap = level.level;
 
 		this.parent.reset();
-	}.bind(this));
+	}.bind(this), function(reason) {
+		console.log("Error loading level, reason:", reason);
+	});
 
 
 	/**

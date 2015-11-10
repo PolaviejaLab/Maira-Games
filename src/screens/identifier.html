@@ -1,0 +1,16 @@
+<div id="screen">
+  <div id="content" class="start_screen">
+    <h1>Enter your ID and click the button to start</h1>
+    <br />
+    <input id="participant_id"
+      type="text" placeholder="Participant ID"
+      ng-model="data.participantId"
+      ng-keypress="($event.which == 13)?next():0">
+
+    <br />
+    <br />
+    <button id="button_start"
+            ng-class="{ 'enabled': data.participantId }"
+            ng-click="next()">Start</button>
+  </div>
+</div>
