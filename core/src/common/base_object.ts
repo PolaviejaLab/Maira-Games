@@ -3,6 +3,9 @@
 
 
 interface Object {
+  parent: Object;
+  engine: Engine;
+  
 	getName: () => string;
   
   getEngine: () => Engine;
@@ -111,7 +114,7 @@ BaseObject.prototype.getEngine = function()
 /**
  * Return array of object names.
  */
-BaseObject.prototype.getObjectNames = function()
+BaseObject.prototype.getObjectNames = function(): string[]
 {
 	return Object.keys(this.children);
 };
@@ -120,7 +123,7 @@ BaseObject.prototype.getObjectNames = function()
 /**
  * Return array of component names.
  */
-BaseObject.prototype.getComponentNames = function()
+BaseObject.prototype.getComponentNames = function(): string[]
 {
 	return Object.keys(this.components);
 };
@@ -133,7 +136,7 @@ BaseObject.prototype.getComponentNames = function()
  * @param {String} name - Name of the child object
  * @param {BaseObject} object - Object to be added
  */
-BaseObject.prototype.addObject = function(name, object)
+BaseObject.prototype.addObject = function(name: string, object: Object)
 {
 	object.parent = this;
 	this.children[name] = object;
@@ -196,7 +199,7 @@ BaseObject.prototype.getObject = function(name)
  * @param {String} name - Name of the component to retreive
  * @returns {Component} Returned component
  */
-BaseObject.prototype.getComponent = function(name)
+BaseObject.prototype.getComponent = function(name: string): Component
 {
   return this.components[name];
 };
@@ -207,7 +210,7 @@ BaseObject.prototype.getComponent = function(name)
  *
  * @param {String} name - Name of the object to delete
  */
-BaseObject.prototype.deleteObject = function(name)
+BaseObject.prototype.deleteObject = function(name: string): void
 {
 	delete this.children[name];
 };
@@ -216,7 +219,7 @@ BaseObject.prototype.deleteObject = function(name)
 /**
  * Remove all child objects.
  */
-BaseObject.prototype.deleteAllObjects = function()
+BaseObject.prototype.deleteAllObjects = function(): void
 {
 	this.children = {};
 };
@@ -225,7 +228,7 @@ BaseObject.prototype.deleteAllObjects = function()
 /**
  * Reset state of child objects.
  */
-BaseObject.prototype.resetChildren = function()
+BaseObject.prototype.resetChildren = function(): void
 {
   for(var key in this.children)
     this.children[key].reset();
@@ -237,7 +240,7 @@ BaseObject.prototype.resetChildren = function()
  *
  * @param {Keyboard} keyboard - State of the keyboard
  */
-BaseObject.prototype.updateChildren = function(keyboard)
+BaseObject.prototype.updateChildren = function(keyboard): void
 {
   for(var key in this.children)
     this.children[key].update(keyboard);
@@ -249,7 +252,7 @@ BaseObject.prototype.updateChildren = function(keyboard)
  *
  * @param {Context} context - Context to draw to
  */
-BaseObject.prototype.drawChildren = function(context)
+BaseObject.prototype.drawChildren = function(context: CanvasRenderingContext2D): void
 {
   for(var key in this.children)
 		this.children[key].draw(context);

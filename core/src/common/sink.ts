@@ -9,16 +9,28 @@
  * @param {Integer} Game identifier
  * @param {String} Name of the current level
  */
-function Sink(sinkAddress)
+class Sink
 {
-  this.sendingInProgress = false;
-  this.sinkAddress = sinkAddress;
+  private sendingInProgress: boolean;
+  private sinkAddress: string;
+  private transmitAutomatically: boolean;
+  private transmitEvery: number;
+  
+  private id: number;
+  private buffer: { [key: number]: any };
 
-  this.transmitAutomatically = true;
-  this.transmitEvery = 1;
-
-  this.id = 0;
-  this.buffer = {};
+  
+  constructor(sinkAddress: string)
+  {
+    this.sendingInProgress = false;
+    this.sinkAddress = sinkAddress;
+  
+    this.transmitAutomatically = true;
+    this.transmitEvery = 1;
+  
+    this.id = 0;
+    this.buffer = {};
+  }
 
 
   /**
@@ -27,7 +39,7 @@ function Sink(sinkAddress)
    * @param {Object} Object to send
    * @returns {Integer} Id of the transmitted move
    */
-  this.appendData = function(data)
+  appendData(data: any): void
   {
     data.id = this.id;
     this.buffer[this.id] = data;
@@ -43,7 +55,7 @@ function Sink(sinkAddress)
   /**
    * Explicitly attempt to transmit data to server.
    */
-  this.transmitData = function()
+  transmitData(): void
   {
     if(this.sendingInProgress)
       return;

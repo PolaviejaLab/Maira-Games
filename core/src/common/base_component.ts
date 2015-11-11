@@ -2,6 +2,11 @@
 "use strict";
 
 
+interface Component
+{  
+}
+
+
 /**
  * Base class for game components.
  *

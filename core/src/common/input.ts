@@ -1,6 +1,17 @@
 /** @module Common **/
 "use strict";
 
+
+interface Keyboard
+{	
+}
+
+
+interface Mouse
+{
+}
+
+
 /**
  * Catches keyboard events and provides an array with states (up / down)
  *
