@@ -1,5 +1,5 @@
+
 backend/datasets
-backend/ldb/levels
 
 # Generated Documentation
 doc
@@ -11,6 +11,9 @@ doc
 
 # Node modules
 node_modules/*
+
+# Bower
+bower_components/*
 
 # Built Javascript files
 src/js/build/*min*
