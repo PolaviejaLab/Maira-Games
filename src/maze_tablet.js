@@ -13,10 +13,10 @@ maze.controller('FlowController', ['$scope',
   function($scope)
   {
     $scope.screens = [
-      { 'template': 'screens/identifier.html' },
-      { 'template': 'screens/instructions.html' },
-      { 'template': 'screens/practise.html' },
-      { 'template': 'screens/level.html' }
+      { 'template': 'screens/maze/identifier.html' },
+      { 'template': 'screens/maze/instructions.html' },
+      { 'template': 'screens/maze/practise.html' },
+      { 'template': 'screens/maze/level.html' }
     ];
 
     // Load fields from query field

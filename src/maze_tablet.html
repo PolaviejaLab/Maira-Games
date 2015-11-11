@@ -10,21 +10,21 @@
     </script>
 
     <!-- jQuery -->
-    <script src="js/vendor/jquery/jquery.min.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.js"></script>
 
     <!-- Twitter Bootstrap -->
-    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link href="bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
-    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
+		<link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
+    <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
     <!-- History -->
     <script src="js/vendor/history/history.js"></script>
 
     <!-- Angular -->
-    <script src="js/vendor/angular/angular.js"></script>
-    <script src="js/vendor/angular/angular-resource.js"></script>
-    <script src="js/vendor/angular/angular-route.js"></script>
-    <script src="js/vendor/angular/angular-cookies.js"></script>
+    <script src="../bower_components/angular/angular.js"></script>
+    <script src="../bower_components/angular-resource/angular-resource.js"></script>
+    <script src="../bower_components/angular-route/angular-route.js"></script>
+    <script src="../bower_components/angular-cookies/angular-cookies.js"></script>
 
     <script src="js/build/maze.js"></script>
     <script src="maze_tablet.js"></script>
@@ -61,7 +61,7 @@
 
       <div id="spacer"></div>
 
-      <div ng-hide="data.fullScreen" ng-include="'screens/fullscreen.html'"></div>
+      <div ng-hide="data.fullScreen" ng-include="'screens/maze/fullscreen.html'"></div>
       <div ng-show="data.fullScreen" ng-include="screen.template"></div>
 
     </div>
