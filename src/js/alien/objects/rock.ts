@@ -162,7 +162,7 @@ function Rock()
     var level = this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
-    var oriY = this.y - 10 + (dirY == 1) * (this.height);
+    var oriY = this.y - 10 + (dirY == 1?1:0) * (this.height);
 
     /**
      * Make sure hitting spikes or water causes the rock to touch the surface

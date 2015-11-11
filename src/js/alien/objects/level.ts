@@ -168,7 +168,7 @@ function Level(levelMap)
 
 		for(var i = 0; i < Math.ceil(length); i++)
 		{
-			var l = {
+			var l: any = {
 				sx: origin.x + dir.x * i,
 				sy: origin.y + dir.y * i
 			};

@@ -88,7 +88,7 @@ function Bomb()
     var level = this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
-    var oriY = this.y + 10 + (dirY == 1) * (this.height - 20);
+    var oriY = this.y + 10 + (dirY == 1?1:0) * (this.height - 20);
 
     /**
      * Make sure hitting spikes or water causes the enemy to touch the surface

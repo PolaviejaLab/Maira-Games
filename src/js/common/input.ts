@@ -99,7 +99,7 @@ function createMoveEvent(name, type, event, canvas, down)
 		},
 
 		bubbles: false,
-		cancellable: true
+		cancelable: true
 	});
 }
 
@@ -147,7 +147,7 @@ function Mouse(canvas)
 
 		var evt = createMoveEvent("game-move", "touch", first, this.canvas, false);
 		this.canvas.dispatchEvent(evt);
-		event.preventDefault();		
+		event.preventDefault();
 	};
 
 	this.element = this.canvas;

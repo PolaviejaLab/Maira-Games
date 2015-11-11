@@ -34,7 +34,7 @@ function findGround(player, level)
  * @param {Object} objectB - Second object
  * @return {false|Object} False if they do not collide
  */
-function collisionCheckX(objectA, objectB)
+function collisionCheckX(objectA, objectB): any
 {
 	var gapXA = objectA.x - (objectB.x + objectB.width);
 	var gapXB = objectB.x - (objectA.x + objectA.width);
@@ -56,7 +56,7 @@ function collisionCheckX(objectA, objectB)
  * @param {Object} objectB - Second object
  * @return {false|Object} False if they do not collide
  */
-function collisionCheckY(objectA, objectB)
+function collisionCheckY(objectA, objectB): any
 {
 	var gapYA = objectA.y - (objectB.y + objectB.height);
 	var gapYB = objectB.y - (objectA.y + objectA.height);
@@ -79,7 +79,7 @@ function collisionCheckY(objectA, objectB)
  * @param {Object} objectB - Second object
  * @return {false|Object} False if they do not collide
  */
-function collisionCheck(objectA, objectB)
+function collisionCheck(objectA, objectB): any
 {
 	var collideX = collisionCheckX(objectA, objectB);
 	var collideY = collisionCheckY(objectA, objectB);
@@ -135,7 +135,7 @@ function detectCollisionArray(objectA, objectsB, callback, offset)
  */
 function inBox(x, y, box)
 {
-	if(x >= box.x && x <= box.x + box.width &
+	if(x >= box.x && x <= box.x + box.width &&
 		 y >= box.y && y <= box.y + box.height)
 			return true;
 	return false;

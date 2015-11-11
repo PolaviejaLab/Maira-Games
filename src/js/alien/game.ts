@@ -12,7 +12,7 @@
  * @param {number} width - Required width of canvas element
  * @param {number} height - Required height of canvas element
  */
-function Game()
+function Game(options)
 {
   this.levelBounds = {x: 0, y: 0, width: 32, height: 32 };
   this.spriteManager = new SpriteManager();

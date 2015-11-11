@@ -169,7 +169,7 @@ function Switch()
     var level = this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
-    var oriY = this.y - 10 + (dirY == 1) * (this.height);
+    var oriY = this.y - 10 + (dirY == 1?1:0) * (this.height);
 
     var callback = function(hit) {
       if(hit.type == 'water') {

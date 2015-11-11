@@ -3,6 +3,21 @@
 
 
 /**
+ * Meta-data associated with a sprite
+ */
+interface SpriteInterface
+{
+	key: number;
+	src: string;
+
+	type?: string;
+	frames?: number;
+	collision?: any;
+	toolbox?: boolean;
+}
+
+
+/**
  * Returns whether a given sprite should be slippery
  *
  * @param {number} sprite - ID of sprite
@@ -96,7 +111,7 @@ var constructors = {
 };
 
 
-var spriteTable = [
+var spriteTable: SpriteInterface[] = [
 	{key: 0x0001, src: 'clipping', collision: true},
 	{key: 0x0002, src: 'sara/idle_left_1', collision: false, type: 'player'},
 

@@ -26,8 +26,8 @@ Box.prototype.contains = function(box)
  */
 Box.prototype.containsPoint = function(point)
 {
-  return point.x >= box.x && point.x <= box.x + box.width &&
-         point.y >= box.y && point.y <= box.y + box.height;
+  return point.x >= this.x && point.x <= this.x + this.width &&
+         point.y >= this.y && point.y <= this.y + this.height;
 }
 
 
@@ -198,8 +198,8 @@ QuadTree.prototype.redistribute = function()
 
     // Inserting failed, verify that parent exists
     if(this.parent === undefined) {
-      console.log("Object does not belong in this tree, inserting it at the root", object);
-      this.bucket.push(object);
+      console.log("Object does not belong in this tree, inserting it at the root", oldBucket[i]);
+      this.bucket.push(oldBucket[i]);
       continue;
     }
 

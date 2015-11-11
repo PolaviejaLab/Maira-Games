@@ -297,8 +297,8 @@ Player.prototype.handleInput = function(input)
  */
 Player.prototype.combineSensors = function(sensors)
 {
-	var minSensor = false;
-	var maxSensor = false;
+	var minSensor: any = false;
+	var maxSensor: any = false;
 
 	for(var i = 0; i < sensors.length; i++) {
 		if(!sensors[i] || !sensors[i].type)
@@ -349,7 +349,7 @@ Player.prototype.collideVerticalDown = function(level)
 	var permitted = this.getPermittedActions();
 
 	var dirY = Math.sign(this.gravity);
-	var oriY = this.y + 10 + (dirY == 1) * (this.height - 20);
+	var oriY = this.y + 10 + (dirY == 1?1:0) * (this.height - 20);
 
 	var hit_left = level.sensor({
 		x: this.x + this.sensor_left,
@@ -401,7 +401,7 @@ Player.prototype.collideVerticalDown = function(level)
 Player.prototype.collideVerticalUp = function(level)
 {
 	var dirY = -Math.sign(this.gravity);
-	var oriY = this.y + 10 + (dirY == 1) * (this.height - 20);
+	var oriY = this.y + 10 + (dirY == 1?1:0) * (this.height - 20);
 
 	var hit_left = level.sensor(
 		{ x: this.x + this.sensor_left, y: oriY },
@@ -603,7 +603,7 @@ Player.prototype.drawFinishedMessage = function(context)
  */
 Player.prototype.draw = function(context)
 {
-	var sprite = '';
+	var sprite: number;
 
 	// Flip player when gravity is inverted
 	if(this.alive) {

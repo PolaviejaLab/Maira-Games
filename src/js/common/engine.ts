@@ -84,7 +84,7 @@ Engine.prototype.updateControlGroupsState = function()
 		var state = true;
 
 		for(var sensor in this.controlGroups[key].sensors) {
-			state &= this.controlGroups[key].sensors[sensor].isActive();
+			state = state && this.controlGroups[key].sensors[sensor].isActive();
 		}
 
 		// Activate actors

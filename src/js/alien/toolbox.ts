@@ -35,7 +35,7 @@ function SpriteBox(element, editor, spriteTable)
 	for(var i = 0; i < spriteTable.length; i++) {
 
 		// Insert breaks when the first element of key changes.
-		if(insertBreaks && currentKey != spriteTable[i].key & 0xFF00) {
+		if(insertBreaks && currentKey != (spriteTable[i].key & 0xFF00)) {
 			var br = document.createElement("br");
 			this.element.appendChild(br);
 			currentKey = spriteTable[i].key[0];

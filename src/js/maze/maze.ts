@@ -1,4 +1,7 @@
 
+declare var server: string;
+declare var datasink: string;
+
 /**
  * Loads the list of levels into a form element.
  * @param {String} element <select> Element to insert levelnames into.

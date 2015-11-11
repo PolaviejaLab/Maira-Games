@@ -24,7 +24,7 @@ function getAddress(url)
  * @param {String} url - Optional string containing the URL to parse
  * @returns {String} Value of the field or false if the key was not found.
  */
-function getQueryField(field, url) {
+function getQueryField(field, url?: string) {
 	return getQueryFieldWithDefault(field, undefined, url);
 }
 

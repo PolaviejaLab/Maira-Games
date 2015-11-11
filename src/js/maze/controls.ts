@@ -61,10 +61,10 @@ function Controls()
     var player = this.player;
 
     // Attempt to move after keypresses
-		if(!moved && input.keys[input.KEY_LEFT])  moved |= player.moveDirection(-1,  0);
-		if(!moved && input.keys[input.KEY_RIGHT]) moved |= player.moveDirection( 1,  0);
-		if(!moved && input.keys[input.KEY_UP])    moved |= player.moveDirection( 0, -1);
-		if(!moved && input.keys[input.KEY_DOWN])  moved |= player.moveDirection( 0,  1);
+		if(!moved && input.keys[input.KEY_LEFT])  moved = moved || player.moveDirection(-1,  0);
+		if(!moved && input.keys[input.KEY_RIGHT]) moved = moved || player.moveDirection( 1,  0);
+		if(!moved && input.keys[input.KEY_UP])    moved = moved || player.moveDirection( 0, -1);
+		if(!moved && input.keys[input.KEY_DOWN])  moved = moved || player.moveDirection( 0,  1);
 
     if(moved)
       this.lastKeyboardMoveTime = Date.now();

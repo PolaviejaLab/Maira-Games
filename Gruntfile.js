@@ -10,21 +10,28 @@ module.exports = function(grunt) {
     sourceMap: true
   };
 
+  var ts_options = {
+    module: "amd",
+    target: "es5",
+    sourceMap: true,
+    declaration: true
+  };
+
   grunt.initConfig({
     pkg: grunt.file.readJSON("package.json"),
 
 
-    concat: {
+    typescript: {
       alienjs: {
-        src: ["src/js/common/*.js", "src/js/alien/*.js", "src/js/alien/components/*.js", "src/js/alien/objects/*.js"],
+        src: ["src/js/typings/*.ts", "src/js/common/*.ts", "src/js/alien/*.ts", "src/js/alien/components/*.ts", "src/js/alien/objects/*.ts"],
         dest: "src/js/build/alien.js",
-        options: concat_options
+        options: ts_options
       },
 
       mazejs: {
-        src: ["src/js/common/*.js", "src/js/maze/*.js"],
+        src: ["src/js/typings/*.ts", "src/js/common/*.ts", "src/js/maze/*.ts"],
         dest: "src/js/build/maze.js",
-        options: concat_options
+        options: ts_options
       }
     },
 
@@ -60,6 +67,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-contrib-concat");
   grunt.loadNpmTasks("grunt-contrib-uglify");
   grunt.loadNpmTasks("grunt-contrib-jshint");
+  grunt.loadNpmTasks("grunt-typescript");
 
-  grunt.registerTask("default", ["concat", "uglify"]);
+  grunt.registerTask("default", ["typescript", "uglify"]);
 }
