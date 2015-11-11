@@ -42,19 +42,6 @@ module.exports = function(grunt) {
     },
 
 
-    jshint: {
-      alienjs: {
-        src: ["build/engine.js", "build/alien.js", "build/maze.js"],
-        options: {
-          browser: true,
-          globalstrict: true,
-          devel: true,
-          jquery: true
-        }
-      }
-    },
-
-
     uglify: {
       enginejs: {
         src: "build/engine.js",

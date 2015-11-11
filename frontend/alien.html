@@ -5,8 +5,8 @@
 
 		<meta charset="utf8" />
 
-		<link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
-		<link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+		<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
 		<link rel="stylesheet" href="css/alien.css">
 
 		<script>
@@ -14,9 +14,10 @@
 			var options;
 		</script>
 
-		<script src="../bower_components/jquery/dist/jquery.js"></script>
-		<script src="js/build/alien.js"></script>
-		<script src="js/alien/alien.js"></script>
+		<script src="bower_components/jquery/dist/jquery.js"></script>
+		<script src="js/compat.js"></script>
+		<script src="../core/build/engine.js"></script>
+		<script src="../core/build/alien.js"></script>
 
 		<script>
 			var editor = null;
@@ -333,7 +334,7 @@
 				 * Initialize game
 				 */
 				var engine = new Engine();
-				var game = new Game();
+				var game = new Game(options);
 
 				game.spriteManager.loadFromSpriteTable(spriteTable,
 					function(left, total) {

@@ -2,6 +2,20 @@
 "use strict";
 
 
+interface Object {
+	getName: () => string;
+  
+  getEngine: () => Engine;
+  
+  reset: () => void;
+  update: (any) => void;
+  draw: (CanvasRenderingContext2D) => void;
+  
+  getObjectNames: () => string[];
+  getComponentNames: () => string[];
+}
+
+
 /**
  * Base class for game objects.
  *
@@ -71,7 +85,7 @@ BaseObject.prototype.onCollision = function(name, object, details)
  *
  * @param {Context} context - Context to draw to
  */
-BaseObject.prototype.draw = function(context)
+BaseObject.prototype.draw = function(context: CanvasRenderingContext2D)
 {
   this.drawChildren(context);
 };

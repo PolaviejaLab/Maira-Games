@@ -2,6 +2,27 @@
 "use strict";
 
 
+interface Engine {	
+}
+
+
+interface Sensor extends Object {
+	isActive: () => boolean;
+}
+
+
+interface Actor extends Object {
+	setState: (boolean) => void;
+}
+
+
+interface ControlGroup {
+	sensors: { [key: string]: Sensor };
+	actors: { [key: string]: Actor };
+	active: boolean;
+} 
+
+
 /**
  * Game engine - responsible for render loop
  * @class
@@ -15,7 +36,7 @@ function Engine()
 /**
  * Returns the controlGroup identified by the specified controlGroupId
  */
-Engine.prototype.getControlGroup = function(controlGroupId)
+Engine.prototype.getControlGroup = function(controlGroupId: number): ControlGroup
 {
 	if(!(controlGroupId in this.controlGroups)) {
 		this.controlGroups[controlGroupId] = {
@@ -32,10 +53,10 @@ Engine.prototype.getControlGroup = function(controlGroupId)
 /**
  * Adds a sensor to a control group
  */
-Engine.prototype.addSensorToControlGroup = function(controlGroupId, sensor)
+Engine.prototype.addSensorToControlGroup = function(controlGroupId: number, sensor: Sensor)
 {
-	var controlGroup = this.getControlGroup(controlGroupId);
-	var name = sensor.getName();
+	var controlGroup: ControlGroup = this.getControlGroup(controlGroupId);
+	var name: string = sensor.getName();
 
 	if(!(name in controlGroup.sensors)) {
 		controlGroup.sensors[name] = sensor;
@@ -43,7 +64,7 @@ Engine.prototype.addSensorToControlGroup = function(controlGroupId, sensor)
 }
 
 
-Engine.prototype.removeSensorFromControlGroup = function(controlGroupId, sensor)
+Engine.prototype.removeSensorFromControlGroup = function(controlGroupId: number, sensor: Sensor)
 {
 	var controlGroup = this.getControlGroup(controlGroupId);
 	var name = sensor.getName();
@@ -56,7 +77,7 @@ Engine.prototype.removeSensorFromControlGroup = function(controlGroupId, sensor)
 /**
  * Adds and actor to a control group
  */
-Engine.prototype.addActorToControlGroup = function(controlGroupId, actor)
+Engine.prototype.addActorToControlGroup = function(controlGroupId: number, actor: Actor): void
 {
 	var controlGroup = this.getControlGroup(controlGroupId);
 	var name = actor.getName();
@@ -67,7 +88,7 @@ Engine.prototype.addActorToControlGroup = function(controlGroupId, actor)
 }
 
 
-Engine.prototype.removeActorFromControlGroup = function(controlGroupId, actor)
+Engine.prototype.removeActorFromControlGroup = function(controlGroupId: number, actor: Actor): void
 {
 	var controlGroup = this.getControlGroup(controlGroupId);
 	var name = actor.getName();
@@ -77,7 +98,7 @@ Engine.prototype.removeActorFromControlGroup = function(controlGroupId, actor)
 }
 
 
-Engine.prototype.updateControlGroupsState = function()
+Engine.prototype.updateControlGroupsState = function(): void
 {
 	for(var key in this.controlGroups) {
 		// Determine state of sensors / control group

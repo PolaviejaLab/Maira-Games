@@ -11,7 +11,7 @@ declare var server: string;
 function updateLevelSelector(element, selected)
 {
   jQuery.ajax(server + "ldb/list_levels.php", { dataType: 'json'}).done(function(result) {
-    for(var i = 0; i < result.length; i++) {
+    for(let i = 0; i < result.length; i++) {
       var list = $(element);
 
       var li = $("<option/>")
