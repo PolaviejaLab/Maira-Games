@@ -1,0 +1,32 @@
+{
+  "name": "Maira-Games",
+  "version": "0.0.1",
+  "homepage": "https://github.com/PolaviejaLab/Maira-Games",
+  "authors": [
+    "Ivar Clemens <post@ivarclemens.nl>"
+  ],
+  "description": "Games",
+  "main": "",
+  "moduleType": [],
+  "keywords": [
+    "Games"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "rxjs": "~4.0.6",
+    "angular": "~1.4.7",
+    "bootstrap": "~3.3.5",
+    "angular-resource": "~1.4.7",
+    "angular-route": "~1.4.7",
+    "angular-cookies": "~1.4.7"
+  }
+}
