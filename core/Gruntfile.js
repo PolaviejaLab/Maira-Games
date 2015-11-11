@@ -22,15 +22,21 @@ module.exports = function(grunt) {
 
 
     typescript: {
+      enginejs: {
+        src: ["src/typings/*.ts", "src/common/*.ts"],
+        dest: "build/engine.js",
+        options: ts_options
+      },
+
       alienjs: {
-        src: ["src/js/typings/*.ts", "src/js/common/*.ts", "src/js/alien/*.ts", "src/js/alien/components/*.ts", "src/js/alien/objects/*.ts"],
-        dest: "src/js/build/alien.js",
+        src: ["src/typings/*.ts", "build/engine.d.ts", "src/alien/*.ts", "src/alien/components/*.ts", "src/alien/objects/*.ts"],
+        dest: "build/alien.js",
         options: ts_options
       },
 
       mazejs: {
-        src: ["src/js/typings/*.ts", "src/js/common/*.ts", "src/js/maze/*.ts"],
-        dest: "src/js/build/maze.js",
+        src: ["src/typings/*.ts", "build/engine.d.ts", "src/maze/*.ts"],
+        dest: "build/maze.js",
         options: ts_options
       }
     },
@@ -38,7 +44,7 @@ module.exports = function(grunt) {
 
     jshint: {
       alienjs: {
-        src: ["src/js/build/alien.js", "src/js/build/maze.js"],
+        src: ["build/engine.js", "build/alien.js", "build/maze.js"],
         options: {
           browser: true,
           globalstrict: true,
@@ -50,15 +56,21 @@ module.exports = function(grunt) {
 
 
     uglify: {
+      enginejs: {
+        src: "build/engine.js",
+        dest: "build/engine.min.js",
+        options: { sourceMap: true }
+      },
+
       alienjs: {
-        src: "src/js/build/alien.js",
-        dest: "src/js/build/alien.min.js",
+        src: "build/alien.js",
+        dest: "build/alien.min.js",
         options: { sourceMap: true }
       },
 
       mazejs: {
-        src: "src/js/build/maze.js",
-        dest: "src/js/build/maze.min.js",
+        src: "build/maze.js",
+        dest: "build/maze.min.js",
         options: { sourceMap: true }
       }
     }

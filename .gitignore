@@ -10,14 +10,13 @@ doc
 *.pyc
 
 # Node modules
-node_modules/*
+core/node_modules/*
 
 # Bower
-bower_components/*
+frontend/bower_components/*
 
 # Built Javascript files
-src/js/build/*min*
-src/js/build/*map*
+core/build/*
 
 # Windows image file caches
 Thumbs.db
