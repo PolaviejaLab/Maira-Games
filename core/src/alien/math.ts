@@ -81,6 +81,11 @@ function collisionCheckY(objectA, objectB): any
  */
 function collisionCheck(objectA, objectB): any
 {
+	if(objectA === undefined || objectB === undefined) {
+		console.trace();
+		console.error("Object is undefined in collision check");
+	}
+	
 	var collideX = collisionCheckX(objectA, objectB);
 	var collideY = collisionCheckY(objectA, objectB);
 

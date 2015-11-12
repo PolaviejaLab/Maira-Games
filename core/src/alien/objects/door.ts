@@ -9,7 +9,6 @@
  */
 class Door extends GraphicalObject
 {
-  private sprite: number;
   private state: boolean;
   public controlGroup: number;
   private direction: string;
@@ -175,15 +174,17 @@ class Door extends GraphicalObject
       
       var children = this.parent.getObjectNames();
       
-      for(var key in children) {
-        var child = this.parent.getObject(key);
+      for(var i = 0; i < children.length; i++) {
+        var child = this.parent.getObject(children[i]);
 
         if(child.type != 'door')
           continue;
         
         var door: Door = <Door> child; 
 
-        if(door.controlGroup == this.controlGroup && door.direction == 'T')
+        if(door.controlGroup == this.controlGroup &&
+           door.state && 
+           door.direction == 'T')
         {
           this.player.x = door.x;
           this.player.y = door.y;

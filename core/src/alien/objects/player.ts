@@ -520,11 +520,12 @@ class AGPlayer extends GraphicalObject
 		this.collideVerticalUp(level);
 	
 		for(var i = 0; i < this.collisionObjects.length; i++) {
-			var collider = this.collisionObjects[i];
-			var box = collider[0];
+			var collider = <Collider> this.collisionObjects[i];
+			var object = <GraphicalObject> collider.parent;
+			var box = collider.getItem(0);
 	
 			var collision = collisionCheck(this, box);
-	
+
 			if(collision === false)
 				continue;
 	
@@ -533,7 +534,7 @@ class AGPlayer extends GraphicalObject
 				this.velX = 0;
 			} else {
 				this.y += collision.normal.y;
-				this.hitGround(collider.parent.sprite, collider.parent.type);
+				this.hitGround(object.sprite, object.type);
 			}
 		}
 	

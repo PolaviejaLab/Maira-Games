@@ -44,10 +44,10 @@ class Switch extends GraphicalObject
 
     this.properties = [
       { 'caption': 'ActiveState', 'type': 'select',
-        'options': [
-          { 'value': 0x704, 'caption': 'Left' },
+        'options': [          
+          { 'value': 0x706, 'caption': 'Left' },
           { 'value': 0x705, 'caption': 'Middle' },
-          { 'value': 0x706, 'caption': 'Right' }
+          { 'value': 0x704, 'caption': 'Right' }
         ],
         'set': function(activeState) { this.setActiveState(activeState); }.bind(this),
         'get': function() { return this.activeState; }.bind(this)
@@ -137,6 +137,10 @@ class Switch extends GraphicalObject
 
     // Add switch to control group; engine might not have been defined before
     this.setControlGroup(this.controlGroup);
+    
+    // Reset state after resetting sprite
+    var engine = this.getEngine();
+    engine.updateControlGroupsState();
   }
 
 

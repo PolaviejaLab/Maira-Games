@@ -9,17 +9,16 @@
  */
 class Enemy extends GraphicalObject
 {
-  private alive: boolean;
-  private flying: boolean;
-  private killable: boolean;
+  private alive: boolean = true;
+  private flying: boolean = true;
+  private killable: boolean = true;
   
-  private velY: number;
+  private velY: number = 0;
   private rotation: number;
-  private sprite: number;
-  private frameCount: number;
+  private frameCount: number = 1;
   
-  private gravity: number;
-  private aggressionLevel: number;
+  private gravity: number = 0.3;
+  private aggressionLevel: number = 0;
   
   private targetX: number;
   private targetY: number;
@@ -30,7 +29,7 @@ class Enemy extends GraphicalObject
   
     this.setStartingPosition(0, 0);
     this.setDimensions(32, 32);     
- 
+  
     this.properties = [
       { 'caption': 'Killable', 'type': 'boolean',
         'set': function(killable) { this.killable = killable; }.bind(this),
@@ -149,7 +148,7 @@ class Enemy extends GraphicalObject
 
   updateGravity()
   {
-    var level: AGLevel = <AGLevel> this.parent.getObject("level");
+    var level: AGLevel = <AGLevel> this.parent.getObject("level");    
 
     var dirY = Math.sign(this.gravity);
     var oriY = this.y + 10 + (dirY == 1?1:0) * (this.height - 20);

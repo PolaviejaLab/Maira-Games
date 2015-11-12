@@ -1,13 +1,15 @@
 
 class GraphicalObject extends GameObject
 {
-  public x: number;
-  public y: number;
-  public width: number;
-  public height: number;
+  public sprite: number = 0;
   
-  private baseX: number;
-  private baseY: number;
+  public x: number = 0;
+  public y: number = 0;
+  public width: number = 32;
+  public height: number = 32;
+  
+  private baseX: number = 0;
+  private baseY: number = 0;
   
   
   /**

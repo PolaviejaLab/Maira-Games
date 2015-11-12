@@ -13,7 +13,6 @@ class Bomb extends GraphicalObject
   private gravity: number;
   private alive: boolean;
   private aggressionLevel: number;
-  private sprite: number;
   
   
   constructor()
