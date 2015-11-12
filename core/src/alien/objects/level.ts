@@ -3,6 +3,21 @@
 
 var spriteSize = 32;
 
+interface AGLevelDynamicLevelGeometry {
+	x: number;
+	y: number;
+	frameCount: number;
+	sprite: number;
+}
+
+
+interface AGLevelLines {
+	a: any;
+	b: any;
+	color: any;
+}
+
+
 /**
  * Creates a new level object.
  *
@@ -10,28 +25,40 @@ var spriteSize = 32;
  * @classdesc Represents a level in the alien girl game.
  * @param {Object} levelMap - Two-dimensional array containing the level
  */
-function Level(levelMap)
+class AGLevel extends GameObject
 {
-	this.levelMap = levelMap;
-	this.collisionTypes = {};
-
-	// Variable that contains canvas for drawing static level elements
-	this.staticLevelCanvas = document.createElement("canvas");
-
-	// Variable that contains collision geometry
-	this.collisionBoxes = undefined;
-
-	// Variable that contains coordinates and IDs for animated sprites
-	this.dynamicLevelGeometry = [];
-
-	// Contains debugging lines to draw
-	this.lines = [];
-
+	public levelMap: number[][];
+	private staticLevelCanvas: HTMLCanvasElement;	
+	
+	private collisionTypes: {[key: number]: any};
+	private collisionBoxes: any;	// QuadTree
+	private dynamicLevelGeometry: AGLevelDynamicLevelGeometry[];
+	private lines: AGLevelLines[];
+	
+	constructor(levelMap)
+	{
+		super();
+		
+		this.levelMap = levelMap;
+		this.collisionTypes = {};
+	
+		// Variable that contains canvas for drawing static level elements
+		this.staticLevelCanvas = document.createElement("canvas");
+	
+		// Variable that contains collision geometry
+		this.collisionBoxes = undefined;
+	
+		// Variable that contains coordinates and IDs for animated sprites
+		this.dynamicLevelGeometry = [];
+	
+		// Contains debugging lines to draw
+		this.lines = [];
+	}
 
 	/**
 	 * Reset level
 	 */
-	this.reset = function()
+	reset()
 	{
 		for(var i = 0; i < spriteTable.length; i++) {
 			var key = spriteTable[i].key;
@@ -43,33 +70,33 @@ function Level(levelMap)
 	};
 
 
-	this.fromArray = function(array)
+	fromArray(array: number[][])
 	{
 		this.levelMap = array;
-	};
+	}
 
 
-	this.toArray = function()
+	toArray(): number[][]
 	{
 		return this.levelMap;
-	};
+	}
 
 
-	this.update = function(input)
+	update(input)
 	{
-	};
+	}
 
 
 	/**
 	 * Converts world coordinates to level (sprite) coordinates
 	 */
-	this.worldToLevelCoords = function(worldCoord)
+	worldToLevelCoords(worldCoord: Point)
 	{
 		return {
 			x: Math.floor(worldCoord.x / spriteSize),
 			y: Math.floor(worldCoord.y / spriteSize)
 		};
-	};
+	}
 
 
 	/**
@@ -80,7 +107,7 @@ function Level(levelMap)
 	* the distance is greater than _length_ or the function
 	* _func_ returns a value.
 	 */
-	this.sensor = function(origin, dir, length, func)
+	sensor(origin: Point, dir: Point, length: number, func)
 	{
 		if(isNaN(origin.x) || isNaN(origin.y)) {
 			console.trace();
@@ -139,7 +166,7 @@ function Level(levelMap)
 		});
 
 		// Draw result
-		if(this.getEngine().debugMode) {
+		if(this.getEngine().isDebugMode()) {
 			if(dir.x != 0)
 				this.lines.push({ a: origin, b: result, color: 'blue' });
 			else
@@ -158,7 +185,7 @@ function Level(levelMap)
 	 * the distance is greater than _length_ or the function
 	 * _func_ returns a value.
 	 */
-	this.spriteSensor = function(origin, dir, length, func)
+	spriteSensor(origin, dir, length, func)
 	{
 		if(isNaN(origin.x) || isNaN(origin.y))
 			throw new Error("SpriteSensor: Origin is set to NaN (" + origin.x + ", " + origin.y + ")");
@@ -216,9 +243,9 @@ function Level(levelMap)
 	/**
 	 * Function to handle simple sprite animations
 	 */
-	this.animate = function(base, frames)
+	animate(base, frames)
 	{
-		var deltaT = this.getEngine().timestamp / 140;
+		var deltaT = this.getEngine().getTimestamp() / 140;
 		return base + Math.floor(1 + deltaT % frames);
 	};
 
@@ -226,22 +253,24 @@ function Level(levelMap)
 	/**
 	 * Draws a single sprite in the grid
 	 */
-	this.drawSprite = function(context, x, y, sprite, frameCount)
+	drawSprite(context, x, y, sprite, frameCount)
 	{
-		if(sprite == 1 && !this.parent.editMode)
+		var game = <AGGame> this.parent;
+				
+		if(sprite == 1 && !game.editMode)
 			return;
 
 		var box = {x: x * spriteSize, y: y * spriteSize, width: spriteSize, height: spriteSize};
-		var frame = (this.getEngine().timestamp >> 7) % frameCount;
+		var frame = (this.getEngine().getTimestamp() >> 7) % frameCount;
 
-		return this.parent.spriteManager.drawSprite(context, box, sprite, frame);
+		return game.spriteManager.drawSprite(context, box, sprite, frame);
 	};
 
 
 	/**
 	 * Cache level geometry
 	 */
-	this.generateCollisionGeometry = function()
+	generateCollisionGeometry()
 	{
 		var width = this.levelMap[0].length * 32;
 		var height = this.levelMap.length * 32;
@@ -288,8 +317,10 @@ function Level(levelMap)
 	 *   - An image containing all the static geometry
 	 *   - An array containing coordinates and IDs for all animated sprites
 	 */
-	this.cacheLevelGeometry = function()
+	cacheLevelGeometry()
 	{
+		var game = <AGGame> this.parent;
+		
 		this.staticLevelCanvas.width = this.getWidth() * spriteSize;
 		this.staticLevelCanvas.height = this.getHeight() * spriteSize;
 
@@ -299,10 +330,10 @@ function Level(levelMap)
 		for(var i = 0; i < this.levelMap.length; i++) {
 			for(var j = 0; j < this.levelMap[0].length; j++) {
 				var sprite = this.levelMap[i][j];
-				var frameCount =  this.parent.spriteManager.getFrameCount(sprite);
+				var frameCount =  game.spriteManager.getFrameCount(sprite);
 
 				// Ignore invalid sprites (that the sprite manager doesn't know about)
-				if(!this.parent.spriteManager.isSpriteValid(sprite))
+				if(!game.spriteManager.isSpriteValid(sprite))
 					continue;
 
 				// Sprites with 1 frame are static, more than one dynamic
@@ -322,7 +353,7 @@ function Level(levelMap)
 	 *
 	 * @param {Context} context - Context to draw to.
 	 */
-	this.drawDebugLines = function(context)
+	drawDebugLines(context)
 	{
 		for(var i = 0; i < this.lines.length; i++)
 			this.drawLine(context, this.lines[i].a, this.lines[i].b, this.lines[i].color);
@@ -338,7 +369,7 @@ function Level(levelMap)
 	 * @param {Object} b - Final coordinate of the line.
 	 * @param {Object} color - Color of the line.
 	 */
-	this.drawLine = function(context, a, b, color)
+	drawLine(context, a, b, color)
 	{
 		context.beginPath();
 		context.moveTo(a.x, a.y);
@@ -354,24 +385,13 @@ function Level(levelMap)
 	 *
 	 * @param {Context} context - Context to draw to.
 	 */
-	this.drawDebugCollisionBoxes = function(context)
+	drawDebugCollisionBoxes(context)
 	{
 		this.collisionBoxes.draw(context);
-
-		var player = this.parent.getObject("player_1");
-
+		var player: AGPlayer = <AGPlayer> this.parent.getObject("player_1");
 		var box = new Box(player.x, player.y, player.width, player.height);
-
-		/*var box = new Box(player.x + 7, player.y + player.height - 10, player.width - 13, 10);
-		  var box = new Box(player.x + 1, player.y + 8, player.width - 4, player.height - 18);*/
-
-		//box.draw(context, 'black');
-
-		var collisions = this.collisionBoxes.query(player.collisionBoxes);
-
-		for(var i = 0; i < collisions.length; i++) {
-			collisions[i].draw(context, 'red');
-		}
+		
+		// Not implemented
 	}
 
 
@@ -380,7 +400,7 @@ function Level(levelMap)
 	 *
 	 * @param {Context} context - Context to draw to.
 	 */
-	this.draw = function(context)
+	draw(context)
 	{
 		context.drawImage(this.staticLevelCanvas, 0, 0);
 
@@ -389,70 +409,68 @@ function Level(levelMap)
 			this.drawSprite(context, item.x, item.y, item.sprite, item.frameCount);
 		}
 
-		if(this.getEngine().debugMode) {
+		if(this.getEngine().isDebugMode()) {
 			this.drawDebugLines(context);
 			this.drawDebugCollisionBoxes(context);
 		}
 	};
-}
 
+	/**
+	* Returns the height of the level in sprites.
+	*
+	* @return {Number} Height of the level.
+	*/
+	getHeight(): number
+	{
+		return this.levelMap.length;
+	};
+	
+	
+	/**
+	* Returns the width of the level in sprites.
+	*
+	* @return {Number} Width of the level.
+	*/
+	getWidth(): number
+	{
+		return this.levelMap[0].length;
+	};
 
-Level.prototype = new BaseObject();
-
-
-/**
- * Returns the height of the level in sprites.
- *
- * @return {Number} Height of the level.
- */
-Level.prototype.getHeight = function()
-{
-	return this.levelMap.length;
-};
-
-
-/**
- * Returns the width of the level in sprites.
- *
- * @return {Number} Width of the level.
- */
-Level.prototype.getWidth = function()
-{
-	return this.levelMap[0].length;
-};
-
-
-/**
- * Sets the sprite at a specific block.
- *
- * @param {Object} coords - Coordinates.
- * @param {Number} sprite - Number of the sprite to set.
- */
-Level.prototype.setSprite = function(coords, sprite)
-{
-	// Check invalid coordinates
-	if(coords.x < 0 || coords.y < 0)
-		return false;
-
-	// Expand level if not big enough
-	if(this.levelMap.length < ( 1 + coords.y) ||
-	   this.levelMap[0].length < coords.x) {
-
-		// Required dimensions
-		var height = Math.max(1 + coords.y, this.levelMap.length);
-		var width = Math.max(1 + coords.x, this.levelMap[0].length);
-
-		for(var i = 0; i < height; i++) {
-			if(i >= this.levelMap.length)
-				this.levelMap[i] = [];
-
-			for(var j = this.levelMap[i].length; j < width; j++)
-				this.levelMap[i][j] = 0;
+	
+	/**
+	* Sets the sprite at a specific block.
+	*
+	* @param {Object} coords - Coordinates.
+	* @param {Number} sprite - Number of the sprite to set.
+	*/
+	setSprite(coords, sprite): boolean
+	{
+		// Check invalid coordinates
+		if(coords.x < 0 || coords.y < 0)
+			return false;
+	
+		// Expand level if not big enough
+		if(this.levelMap.length < ( 1 + coords.y) ||
+		this.levelMap[0].length < coords.x) {
+	
+			// Required dimensions
+			var height = Math.max(1 + coords.y, this.levelMap.length);
+			var width = Math.max(1 + coords.x, this.levelMap[0].length);
+	
+			for(var i = 0; i < height; i++) {
+				if(i >= this.levelMap.length)
+					this.levelMap[i] = [];
+	
+				for(var j = this.levelMap[i].length; j < width; j++)
+					this.levelMap[i][j] = 0;
+			}
 		}
+	
+		this.levelMap[coords.y][coords.x] = sprite;
+	
+		this.cacheLevelGeometry();
+		this.generateCollisionGeometry();
+		
+		return true;
 	}
-
-	this.levelMap[coords.y][coords.x] = sprite;
-
-	this.cacheLevelGeometry();
-	this.generateCollisionGeometry();
-};
+}

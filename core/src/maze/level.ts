@@ -6,20 +6,40 @@
  *
  * @class
  */
-function Level(level)
+class MGLevel
 {
-	this.server = "http://maira-server.champalimaud.pt/games/backend/";
-	this.levelMap = [[3]];
+	private levelName: string;
+	private levelMap: number[][];
+	private server: string;
+	
+	private widthwall: number;
+	private widthspace: number;
+	
+	constructor(levelName: string)
+	{
+		this.levelName = levelName;
+		
+		this.server = "http://maira-server.champalimaud.pt/games/backend/";
+		this.levelMap = [[3]];
+		
+		this.getLevelFromServer(levelName).then(function(level) {
+			this.levelMap = level.level;
+
+			this.parent.reset();
+		}.bind(this), function(reason) {
+			console.log("Error loading level, reason:", reason);
+		});
+	}
 
 
-	this.getLevelFromServer = function(name)
+	getLevelFromServer(levelName: string)
 	{
 		return new Promise(function(resolve, reject) {
 			if(typeof(this.server) == 'undefined' || !this.server)
 				reject("Server is undefined");
 
 			jQuery.ajax({
-				url: this.server + "mldb/get_level.php?name=" + name,
+				url: this.server + "mldb/get_level.php?name=" + levelName,
 				dataType: 'json'
 			}).done(function(data) {
 				resolve(data);
@@ -31,19 +51,10 @@ function Level(level)
 	}
 
 
-	this.getLevelFromServer(level).then(function(level) {
-		this.levelMap = level.level;
-
-		this.parent.reset();
-	}.bind(this), function(reason) {
-		console.log("Error loading level, reason:", reason);
-	});
-
-
 	/**
 	 * Reset state of the game
 	 */
-	this.reset = function()
+	reset()
 	{
 		// Copy wall and space width from parent
 		this.widthwall = this.parent.widthwall;

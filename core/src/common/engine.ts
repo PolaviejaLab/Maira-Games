@@ -1,13 +1,13 @@
 /** @module Common **/
 "use strict";
 
-
-interface Sensor extends Object {
+interface Sensor extends GameObject {
+	controlGroup: number;
 	isActive: () => boolean;
 }
 
-
-interface Actor extends Object {
+interface Actor extends GameObject {
+	controlGroup: number;
 	setState: (boolean) => void;
 }
 
@@ -16,7 +16,7 @@ interface ControlGroup {
 	sensors: { [key: string]: Sensor };
 	actors: { [key: string]: Actor };
 	active: boolean;
-} 
+}
 
 
 /**
@@ -25,17 +25,37 @@ interface ControlGroup {
  */
 class Engine
 {
+	public canvas: HTMLCanvasElement;	
+	
+	private timestamp: number;	
 	private controlGroups: { [key: string]: ControlGroup } = {};
-	private canvas: HTMLCanvasElement;
 	private context: CanvasRenderingContext2D;
 	
 	private editMode: boolean;
 	private debugMode: boolean;
 	
-	private game: Object;
+	private game: GameObject;
 	
 	private input: Keyboard;
 	private mouse: Mouse;
+
+
+	isEditMode(): boolean
+	{
+		return this.editMode;
+	}
+
+
+	isDebugMode(): boolean
+	{
+		return this.debugMode;
+	}
+	
+	
+	getTimestamp(): number
+	{
+		return this.timestamp;
+	}
 	
 
 	/**
@@ -121,7 +141,7 @@ class Engine
 	}
 	
 	
-	initializeEngine(element: string, width: number, height: number, game: Object)
+	initializeEngine(element: string, width: number, height: number, game: GameObject)
 	{
 		this.canvas = <HTMLCanvasElement> document.getElementById(element);
 		if(!this.canvas) {

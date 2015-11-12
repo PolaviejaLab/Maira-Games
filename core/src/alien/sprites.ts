@@ -50,7 +50,7 @@ var constructors = {
 	},
 
 	'player': function(array) {
-		var player = new Player();
+		var player = new AGPlayer();
 		player.fromArray(array);
 		return player;
 	},

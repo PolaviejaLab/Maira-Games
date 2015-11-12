@@ -28,7 +28,7 @@ function LevelLoader(game)
       this.game.deleteAllObjects();
       this.getLevelFromServer(name).then(
         function(data) {
-          var level = new Level(data.level);
+          var level = new AGLevel(data.level);
 
           this.setLevelBounds(level);
           this.game.addObject('level', level);

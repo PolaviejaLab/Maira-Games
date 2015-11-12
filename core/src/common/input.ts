@@ -2,11 +2,6 @@
 "use strict";
 
 
-interface Keyboard
-{	
-}
-
-
 interface Mouse
 {
 }
@@ -22,66 +17,71 @@ interface Mouse
  *
  * @class
  */
-function Keyboard()
+class Keyboard
 {
-	this.KEY_BACKSPACE = 8;
-	this.KEY_TAB = 9;
+	KEY_BACKSPACE: number = 8;
+	KEY_TAB:number = 9;
 
-	this.KEY_ENTER = 13;
-	this.KEY_SHIFT = 16;
-	this.KEY_CTRL = 17;
-	this.KEY_ALT = 18;
+	KEY_ENTER:number = 13;
+	KEY_SHIFT:number = 16;
+	KEY_CTRL:number = 17;
+	KEY_ALT:number = 18;
 
-	this.KEY_PAUSE = 19;
-	this.KEY_CAPS = 20;
-	this.KEY_ESCAPE = 27;
+	KEY_PAUSE:number = 19;
+	KEY_CAPS:number = 20;
+	KEY_ESCAPE:number = 27;
 
-	this.KEY_SPACE = 32;
+	KEY_SPACE:number = 32;
 
-	this.KEY_LEFT = 37;
-	this.KEY_UP = 38;
-	this.KEY_RIGHT = 39;
-	this.KEY_DOWN = 40;
+	KEY_LEFT:number = 37;
+	KEY_UP:number = 38;
+	KEY_RIGHT:number = 39;
+	KEY_DOWN:number = 40;
 
-	this.KEY_A = 65;
-	this.KEY_B = 66;
-	this.KEY_C = 67;
-	this.KEY_D = 68;
-	this.KEY_E = 69;
-	this.KEY_F = 70;
-	this.KEY_G = 71;
-	this.KEY_H = 72;
-	this.KEY_I = 73;
-	this.KEY_J = 74;
-	this.KEY_K = 75;
-	this.KEY_L = 76;
-	this.KEY_M = 77;
-	this.KEY_N = 78;
-	this.KEY_O = 79;
-	this.KEY_P = 80;
-	this.KEY_Q = 81;
-	this.KEY_R = 82;
-	this.KEY_S = 83;
-	this.KEY_T = 84;
-	this.KEY_U = 85;
-	this.KEY_V = 86;
-	this.KEY_W = 87;
-	this.KEY_X = 88;
-	this.KEY_Y = 89;
-	this.KEY_Z = 90;
+	KEY_A:number = 65;
+	KEY_B:number = 66;
+	KEY_C:number = 67;
+	KEY_D:number = 68;
+	KEY_E:number = 69;
+	KEY_F:number = 70;
+	KEY_G:number = 71;
+	KEY_H:number = 72;
+	KEY_I:number = 73;
+	KEY_J:number = 74;
+	KEY_K:number = 75;
+	KEY_L:number = 76;
+	KEY_M:number = 77;
+	KEY_N:number = 78;
+	KEY_O:number = 79;
+	KEY_P:number = 80;
+	KEY_Q:number = 81;
+	KEY_R:number = 82;
+	KEY_S:number = 83;
+	KEY_T:number = 84;
+	KEY_U:number = 85;
+	KEY_V:number = 86;
+	KEY_W:number = 87;
+	KEY_X:number = 88;
+	KEY_Y:number = 89;
+	KEY_Z:number = 90;
 
-	this.keys = {};
+	keys: { [key: number]: boolean } = {};
 
-	this.keydown = function(event) {
+	constructor()
+	{
+		document.body.addEventListener("keydown", this.onkeydown.bind(this));
+		document.body.addEventListener("keyup", this.onkeyup.bind(this));
+	}
+	
+	onkeydown(event: KeyboardEvent): void 
+	{
 		this.keys[event.keyCode] = true;
-	};
+	}
 
-	this.keyup = function(event) {
+	onkeyup = function(event: KeyboardEvent): void 
+	{
 		this.keys[event.keyCode] = false;
-	};
-
-	document.body.addEventListener("keydown", this.keydown.bind(this));
-	document.body.addEventListener("keyup", this.keyup.bind(this));
+	}
 }
 
 

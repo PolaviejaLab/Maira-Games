@@ -7,28 +7,38 @@
  * @class
  * @classdesc Object representing an frog in the alien girl game.
  */
-function Frog()
+class Frog extends GraphicalObject
 {
-  this.baseX = 0;
-  this.baseY = 0;
+  public alive: boolean = true;
+  
+  public velY: number;
+  public gravity: number;
+  
+  public sprite: number;
+  public player: AGPlayer;
+  public worms: Worm[];
+  
+  constructor()
+  {
+    super();
+    
+    this.setStartingPosition(0, 0);
+    this.setDimensions(32, 32);
 
-  this.width = 32;
-  this.height = 32;
-
-  this.velY = 0;
-  this.gravity = 0.3;
-
-  this.sprite = 0;
-
-  // Worm and player objects to check collisions against
-  this.player = false;
-  this.worms = [];
+    this.velY = 0;
+    this.gravity = 0.3;
+  
+    this.sprite = 0;
+  
+    // Worm objects to check collisions against
+    this.worms = [];
+  }
 
 
   /**
    * Serialize state to array
    */
-  this.toArray = function()
+  toArray()
   {
     return {
       'x': this.x,
@@ -42,7 +52,7 @@ function Frog()
   /**
    * Unserialize state from array
    */
-  this.fromArray = function(array)
+  fromArray(array)
   {
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
@@ -52,10 +62,9 @@ function Frog()
   /**
    * Setups the frog at the start of the game
    */
-  this.reset = function()
+  reset()
   {
-    this.x = this.baseX;
-    this.y = this.baseY;
+    this.resetChildren();
     this.alive = true;
 
     // Find worms
@@ -64,32 +73,19 @@ function Frog()
     for(var i = 0; i < names.length; i++) {
       var object = this.parent.getObject(names[i]);
       if(object.type == 'worm')
-        this.worms.push(object);
+        this.worms.push(<Worm> object);
     }
 
     // Find player
-    this.player = this.parent.getObject("player_1");
+    this.player = <AGPlayer> this.parent.getObject("player_1");
   }
-
-
-  /**
-	 * Update stating position of the frog
-	 *
-	 * @param {number} x - X coordinate of frog starting location
-   * @param {number} y - Y coordinate of frog starting location
-   */
-	this.setStartingPosition = function(x, y)
-	{
-		this.baseX = x;
-		this.baseY = y;
-	}
 
 
   /**
    * Set base sprite for frog
    * @param {number} sprite - ID of base sprite
    */
-  this.setBaseSprite = function(sprite)
+  setBaseSprite(sprite)
   {
     this.sprite = sprite;
   }
@@ -98,10 +94,10 @@ function Frog()
   /**
    * Updates the frog
    */
-  this.update = function(keyboard)
+  update(keyboard)
   {
     var push_key = keyboard.keys[keyboard.KEY_P];
-    var level = this.parent.getObject("level");
+    var level = <AGLevel> this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
     var oriY = this.y + 10 + (dirY == 1?1:0) * (this.height - 20);
@@ -161,14 +157,14 @@ function Frog()
    *
    * @param {Context} context - Context to draw to
    */
-  this.draw = function(context)
+  draw(context)
   {
+    var game: AGGame = <AGGame> this.parent;
+    
     if(this.alive) {
-      this.parent.spriteManager.drawSprite(context, this, this.sprite, 0);
+      game.spriteManager.drawSprite(context, this, this.sprite, 0);
     } else {
-      this.parent.spriteManager.drawSprite(context, this, this.sprite + 2, 0);
+      game.spriteManager.drawSprite(context, this, this.sprite + 2, 0);
     }
   }
 }
-
-Frog.prototype = new BaseObject();

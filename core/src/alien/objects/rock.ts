@@ -7,29 +7,34 @@
  * @class
  * @classdesc Object representing a rock in the alien girl game.
  */
-function Rock()
+class Rock extends GraphicalObject
 {
-  this.mode = 'rock';
+  public mode: string;
+  public velY: number;
+  public gravity: number;
+  public sprite: number;  
+  public player: AGPlayer;
+  
+  constructor()
+  {
+    super();
 
-  this.baseX = 0;
-  this.baseY = 0;
-
-  this.width = 32;
-  this.height = 32;
-
-  this.velY = 0;
-  this.gravity = 0.3;
-
-  this.sprite = 0;
-
-  /** This is a bug, the parent class should initialize this **/
-  this.components = {};
+    this.mode = 'rock';
+  
+    this.setStartingPosition(0, 0);
+    this.setDimensions(32, 32);
+  
+    this.velY = 0;
+    this.gravity = 0.3;
+  
+    this.sprite = 0;
+  }
 
 
   /**
    * Serialize state to array
    */
-  this.toArray = function()
+  toArray()
   {
     return {
       'x': this.x,
@@ -43,7 +48,7 @@ function Rock()
   /**
    * Unserialize state from array
    */
-  this.fromArray = function(array)
+  fromArray(array)
   {
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
@@ -54,79 +59,65 @@ function Rock()
   /**
    * Setups the enemy at the start of the game
    */
-  this.reset = function()
+  reset()
   {
-    this.x = this.baseX;
-    this.y = this.baseY;
-
-    this.width = 32;
-    this.height = 32;
+    this.resetPosition();
+    this.setDimensions(32, 32);
 
     this.mode = 'rock';
 
     if(this.getComponent('collider') === undefined)
     {
       // Create collider
-      this.addComponent("collider", new Collider());
+      var collider = new Collider();      
 
       // Player body
       var box = new Box(0, 0, this.width - 10, this.height - 14);
-      this.getComponent("collider").push(box);
+      collider.push(box);
+      
+      this.addComponent("collider", collider);
       this.updateCollider();
     }
 
     // Find player
-    this.player = this.parent.getObject("player_1");
+    this.player = <AGPlayer> this.parent.getObject("player_1");
   }
 
 
-  this.updateCollider = function()
+  updateCollider()
   {
-    var collider = this.getComponent("collider");
+    var collider = <Collider> this.getComponent("collider");
 
-    for(var i = 0; i < collider.length; i++) {
+    for(var i = 0; i < collider.length(); i++) {
       if(this.mode == 'rock')
       {
-        collider[i].x = this.x + 5;
-        collider[i].y = this.y + 14;
-        collider[i].width = this.width - 10;
-        collider[i].height = this.height - 14;
+        collider.getItem(i).x = this.x + 5;
+        collider.getItem(i).y = this.y + 14;
+        collider.getItem(i).width = this.width - 10;
+        collider.getItem(i).height = this.height - 14;
       } else {
-        collider[i].x = this.x;
-        collider[i].y = this.y;
-        collider[i].width = this.width;
-        collider[i].height = this.height;
+        collider.getItem(i).x = this.x;
+        collider.getItem(i).y = this.y;
+        collider.getItem(i).width = this.width;
+        collider.getItem(i).height = this.height;
       }
     }
   }
 
 
   /**
-	 * Update stating position of the rock
-	 *
-	 * @param {number} x - X coordinate of enemy starting location
-   * @param {number} y - Y coordinate of enemy starting location
-   */
-	this.setStartingPosition = function(x, y)
-	{
-		this.baseX = x;
-		this.baseY = y;
-	}
-
-
-  /**
    * Set base sprite for rock
    * @param {number} sprite - ID of base sprite
    */
-  this.setBaseSprite = function(sprite)
+  setBaseSprite(sprite)
   {
     this.sprite = sprite;
   }
 
 
-  this.switchToGround = function(sx, sy)
+  switchToGround(sx, sy)
   {
-    var level = this.parent.getObject("level");
+    var level = <AGLevel> this.parent.getObject("level");
     this.mode = 'ground';
 
     // Find extents of quicksand
@@ -153,13 +144,13 @@ function Rock()
   /**
    * Updates the rock
    */
-  this.update = function(keyboard)
+  update(keyboard)
   {
     if(this.mode != 'rock')
       this.updateCollider();
 
     var push_key = keyboard.keys[keyboard.KEY_P];
-    var level = this.parent.getObject("level");
+    var level = <AGLevel> this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
     var oriY = this.y - 10 + (dirY == 1?1:0) * (this.height);
@@ -212,19 +203,19 @@ function Rock()
    *
    * @param {Context} context - Context to draw to
    */
-  this.draw = function(context)
+  draw(context)
   {
+    var game = <AGGame> this.parent;
+    
     if(this.mode == 'rock') {
-      this.parent.spriteManager.drawSprite(context, this, this.sprite, 0);
+      game.spriteManager.drawSprite(context, this, this.sprite, 0);
     } else {
-      this.parent.spriteManager.drawSprite(context, this, 0x0116, 0);
+      game.spriteManager.drawSprite(context, this, 0x0116, 0);
     }
 
-    if(this.getEngine().debugMode) {
+    if(this.getEngine().isDebugMode()) {
       var collider = this.getComponent("collider");
       collider.draw(context);
     }
   }
 }
-
-Rock.prototype = new BaseObject();

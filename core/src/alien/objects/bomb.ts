@@ -7,26 +7,35 @@
  * @class
  * @classdesc Object representing an enemy in the alien girl game.
  */
-function Bomb()
+class Bomb extends GraphicalObject
 {
-  this.baseX = 0;
-  this.baseY = 0;
-
-  this.width = 32;
-  this.height = 32;
-
-  this.velY = 0;
-  this.gravity = 0.3;
-  this.alive = true;
-  this.aggressionLevel = 0;
-
-  this.sprite = 0;
+  private velY: number;
+  private gravity: number;
+  private alive: boolean;
+  private aggressionLevel: number;
+  private sprite: number;
+  
+  
+  constructor()
+  {
+    super()
+    
+    this.setStartingPosition(0, 0);
+    this.setDimensions(32, 32);
+      
+    this.velY = 0;
+    this.gravity = 0.3;
+    this.alive = true;
+    this.aggressionLevel = 0;
+  
+    this.sprite = 0;
+  }
 
 
   /**
    * Serialize state to array
    */
-  this.toArray = function()
+  toArray()
   {
     return {
       'x': this.x,
@@ -40,7 +49,7 @@ function Bomb()
   /**
    * Unserialize state from array
    */
-  this.fromArray = function(array)
+  fromArray(array)
   {
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
@@ -50,31 +59,17 @@ function Bomb()
   /**
    * Setups the enemy at the start of the game
    */
-  this.reset = function()
+  reset()
   {
-    this.x = this.baseX;
-    this.y = this.baseY;
+    this.resetPosition();
   }
-
-
-  /**
-	 * Update stating position of the bomb
-	 *
-	 * @param {number} x - X coordinate of enemy starting location
-   * @param {number} y - Y coordinate of enemy starting location
-   */
-	this.setStartingPosition = function(x, y)
-	{
-		this.baseX = x;
-		this.baseY = y;
-	}
 
 
   /**
    * Set base sprite for bomb
    * @param {number} sprite - ID of base sprite
    */
-  this.setBaseSprite = function(sprite)
+  setBaseSprite(sprite)
   {
     this.sprite = sprite;
   }
@@ -83,9 +78,9 @@ function Bomb()
   /**
    * Updates the bomb
    */
-  this.update = function()
+  update()
   {
-    var level = this.parent.getObject("level");
+    var level = <AGLevel> this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
     var oriY = this.y + 10 + (dirY == 1?1:0) * (this.height - 20);
@@ -120,10 +115,10 @@ function Bomb()
    *
    * @param {Context} context - Context to draw to
    */
-  this.draw = function(context)
+  draw(context: CanvasRenderingContext2D)
   {
-    this.parent.spriteManager.drawSprite(context, this, this.sprite, 0);
+    var game = <AGGame> this.parent;
+    
+    game.spriteManager.drawSprite(context, this, this.sprite, 0);
   }
 }
-
-Bomb.prototype = new BaseObject();

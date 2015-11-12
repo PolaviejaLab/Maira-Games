@@ -7,49 +7,57 @@
  * @class
  * @classdesc Object representing an enemy in the alien girl game.
  */
-function Enemy()
+class Enemy extends GraphicalObject
 {
-  this.baseX = 0;
-  this.baseY = 0;
+  private alive: boolean;
+  private flying: boolean;
+  private killable: boolean;
+  
+  private velY: number;
+  private rotation: number;
+  private sprite: number;
+  private frameCount: number;
+  
+  private gravity: number;
+  private aggressionLevel: number;
+  
+  private targetX: number;
+  private targetY: number;
+  
+  constructor()
+  {
+    super();
+  
+    this.setStartingPosition(0, 0);
+    this.setDimensions(32, 32);     
+ 
+    this.properties = [
+      { 'caption': 'Killable', 'type': 'boolean',
+        'set': function(killable) { this.killable = killable; }.bind(this),
+        'get': function() { return this.killable; }.bind(this)
+      },
+      { 'caption': 'Flying', 'type': 'boolean',
+        'set': function(flying) { this.flying = flying; }.bind(this),
+        'get': function() { return this.flying; }.bind(this)
+      },
+      {
+        'caption': 'Aggression',
+        'type': 'select',
+        'options': [
+          { 'value': 0, 'caption': 'Not aggressive', },
+          { 'value': 1, 'caption': 'Aggressive' }
+        ],
+        'set': function(aggression) { this.setAggressionLevel(aggression); }.bind(this),
+        'get': function() { return this.aggressionLevel; }.bind(this)
+      }
+    ];
+  }
 
-  this.width = 32;
-  this.height = 32;
-
-  this.velY = 0;
-  this.gravity = 0.3;
-  this.alive = true;
-  this.aggressionLevel = 0;
-  this.killable = true;
-  this.flying = true;
-
-  this.sprite = 0;
-  this.frameCount = 1;
-
-  this.properties = [
-    { 'caption': 'Killable', 'type': 'boolean',
-      'set': function(killable) { this.killable = killable; }.bind(this),
-      'get': function() { return this.killable; }.bind(this)
-    },
-    { 'caption': 'Flying', 'type': 'boolean',
-      'set': function(flying) { this.flying = flying; }.bind(this),
-      'get': function() { return this.flying; }.bind(this)
-    },
-    {
-      'caption': 'Aggression',
-      'type': 'select',
-      'options': [
-        { 'value': 0, 'caption': 'Not aggressive', },
-        { 'value': 1, 'caption': 'Aggressive' }
-      ],
-      'set': function(aggression) { this.setAggressionLevel(aggression); }.bind(this),
-      'get': function() { return this.aggressionLevel; }.bind(this)
-    }
-  ];
 
   /**
    * Serialize state to array
    */
-  this.toArray = function()
+  toArray()
   {
     return {
       'x': this.x,
@@ -65,7 +73,7 @@ function Enemy()
   /**
    * Unserialize state from array
    */
-  this.fromArray = function(array)
+  fromArray(array)
   {
     if('aggressionLevel' in array)
       this.setAggressionLevel(array.aggressionLevel);
@@ -80,17 +88,20 @@ function Enemy()
   /**
    * Setups the enemy at the start of the game
    */
-  this.reset = function()
+  reset()
   {
-    this.targetX = this.baseX;
-    this.targetY = this.baseY;
+    var game: AGGame = <AGGame> this.parent;
+    
+    var startingPosition = this.getStartingPosition();
+    
+    this.targetX = startingPosition.x;
+    this.targetY = startingPosition.y;
 
-    this.x = this.baseX;
-    this.y = this.baseY;
+    this.resetPosition();
 
     this.alive = true;
 
-    this.frameCount = this.parent.spriteManager.getFrameCount(this.sprite);
+    this.frameCount = game.spriteManager.getFrameCount(this.sprite);
 
     /***
      * This is a work-around and these properties should be available from
@@ -120,38 +131,25 @@ function Enemy()
    *
    * @param {number} aggressionLevel - Aggressiveness of animal
    */
-  this.setAggressionLevel = function(aggressionLevel)
+  setAggressionLevel(aggressionLevel)
   {
     this.aggressionLevel = aggressionLevel;
   }
 
 
   /**
-	 * Update stating position of the enemy
-	 *
-	 * @param {number} x - X coordinate of enemy starting location
-   * @param {number} y - Y coordinate of enemy starting location
-   */
-	this.setStartingPosition = function(x, y)
-	{
-		this.baseX = x;
-		this.baseY = y;
-	}
-
-
-  /**
    * Set base sprite for enemy
    * @param {number} sprite - ID of base sprite (dead sprite is +1)
    */
-  this.setBaseSprite = function(sprite)
+  setBaseSprite(sprite)
   {
     this.sprite = sprite;
   }
 
 
-  this.updateGravity = function()
+  updateGravity()
   {
-    var level = this.parent.getObject("level");
+    var level: AGLevel = <AGLevel> this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
     var oriY = this.y + 10 + (dirY == 1?1:0) * (this.height - 20);
@@ -184,9 +182,12 @@ function Enemy()
   /**
    * Updates the enemy; it is hunting the player
    */
-  this.updateHunting = function()
+  updateHunting()
   {
-    var player = this.parent.getObject("player_1");
+    var player: AGPlayer = 
+      <AGPlayer> this.parent.getObject("player_1");
+
+    var startingPosition = this.getStartingPosition();
 
     if(!player)
       throw new Error("Could not find object player_1");
@@ -196,7 +197,7 @@ function Enemy()
       player.x + player.width / 2 <= this.x + this.width &&
       player.y > this.y;
 
-    var player_went_past = (player.x - 2 * player.width) > this.baseX;
+    var player_went_past = (player.x - 2 * player.width) > startingPosition.x;
 
 
     if(this.aggressionLevel != 0)
@@ -206,8 +207,8 @@ function Enemy()
         this.targetX = player.x;
         this.targetY = player.y;
       } else {
-        this.targetX = this.baseX;
-        this.targetY = this.baseY;
+        this.targetX = startingPosition.x;
+        this.targetY = startingPosition.y;
       }
 
       this.x = lerp(this.x, this.targetX, 0.2);
@@ -243,7 +244,7 @@ function Enemy()
   /**
    * Updates the enemy; it is dying
    */
-  this.updateDying = function()
+  updateDying()
   {
     this.updateGravity();
 
@@ -254,7 +255,7 @@ function Enemy()
   /**
    * Updates the enemy
    */
-  this.update = function()
+  update()
   {
     if(this.alive) {
       this.updateHunting();
@@ -269,18 +270,17 @@ function Enemy()
    *
    * @param {Context} context - Context to draw to
    */
-  this.draw = function(context)
+  draw(context)
   {
-    var frame = Math.floor((this.getEngine().timestamp / 120) % this.frameCount);
+    var game: AGGame = <AGGame> this.parent;
+    var frame = Math.floor((this.getEngine().getTimestamp() / 120) % this.frameCount);
 
     if(this.alive) {
-      this.parent.spriteManager.drawSprite(context, this, this.sprite, frame);
+      game.spriteManager.drawSprite(context, this, this.sprite, frame);
     } else {
-      this.parent.spriteManager.drawSprite(context, this, this.sprite + 1, 0, function(context) {
+      game.spriteManager.drawSprite(context, this, this.sprite + 1, 0, function(context) {
         context.rotate(this.rotation);
       }.bind(this));
     }
   }
 }
-
-Enemy.prototype = new BaseObject();

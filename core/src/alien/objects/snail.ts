@@ -7,24 +7,32 @@
  * @class
  * @classdesc Object representing an snail in the alien girl game.
  */
-function Snail()
+class Snail extends GraphicalObject
 {
-  this.baseX = 0;
-  this.baseY = 0;
+  public alive: boolean;
+  public velY: number;
+  public gravity: number;
+  public sprite: number;
+  
+  
+  constructor()
+  {
+    super();
+    
+    this.setStartingPosition(0, 0);
+    this.setDimensions(24, 18);
 
-  this.width = 24;
-  this.height = 18;
-
-  this.velY = 0;
-  this.gravity = 0.3;
-
-  this.sprite = 0;
+    this.velY = 0;
+    this.gravity = 0.3;
+  
+    this.sprite = 0;
+  }
 
 
   /**
    * Serialize state to array
    */
-  this.toArray = function()
+  toArray()
   {
     return {
       'x': this.x,
@@ -38,7 +46,7 @@ function Snail()
   /**
    * Unserialize state from array
    */
-  this.fromArray = function(array)
+  fromArray(array)
   {
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
@@ -48,32 +56,18 @@ function Snail()
   /**
    * Setups the snail at the start of the game
    */
-  this.reset = function()
+  reset()
   {
-    this.x = this.baseX;
-    this.y = this.baseY;
+    this.resetPosition();
     this.alive = true;
   }
-
-
-  /**
-	 * Update stating position of the snail
-	 *
-	 * @param {number} x - X coordinate of snail starting location
-   * @param {number} y - Y coordinate of snail starting location
-   */
-	this.setStartingPosition = function(x, y)
-	{
-		this.baseX = x;
-		this.baseY = y;
-	}
 
 
   /**
    * Set base sprite for snail
    * @param {number} sprite - ID of base sprite
    */
-  this.setBaseSprite = function(sprite)
+  setBaseSprite(sprite)
   {
     this.sprite = sprite;
   }
@@ -82,9 +76,9 @@ function Snail()
   /**
    * Updates the snail
    */
-  this.update = function(keyboard)
+  update(keyboard: Keyboard)
   {
-    var level = this.parent.getObject("level");
+    var level = <AGLevel> this.parent.getObject("level");
 
     var dirY = Math.sign(this.gravity);
     var oriY = this.y + 10 + (dirY == 1?1:0) * (this.height - 20);
@@ -120,14 +114,14 @@ function Snail()
    *
    * @param {Context} context - Context to draw to
    */
-  this.draw = function(context)
+  draw(context)
   {
+    var game = <AGGame> this.parent;
+    
     if(this.alive) {
-      this.parent.spriteManager.drawSprite(context, this, this.sprite, 0);
+      game.spriteManager.drawSprite(context, this, this.sprite, 0);
     } else {
-      this.parent.spriteManager.drawSprite(context, this, this.sprite + 2, 0);
+      game.spriteManager.drawSprite(context, this, this.sprite + 2, 0);
     }
   }
 }
-
-Snail.prototype = new BaseObject();
