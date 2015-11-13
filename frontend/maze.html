@@ -8,11 +8,6 @@
 		<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
 		<link rel="stylesheet" href="css/maze.css">
 
-		<script>
-			var datasink = "http://maira-server.champalimaud.pt/games/backend/sink.php";
-			var server = "http://maira-server.champalimaud.pt/games/backend/";
-		</script>
-
 		<script src="bower_components/jquery/dist/jquery.js"></script>
 
 		<script src="../core/build/engine.js"></script>
@@ -104,13 +99,15 @@
 				$("#user-id").val(options.userId);
 				$("#control-mode").val(options.controlMode);
 
-				updateLevelSelector("#level-list", options.levelName);
+				updateLevelSelector(options, "#level-list", options.levelName);
 
 				// If the game has not been assigned an identifier yet, do so now
 				if(!options.gameStart) {
 					options.gameStart = Math.floor(Date.now() / 1000);
 					window.location.href = updateQueryString({game: options.gameStart});
 					return;
+				} else {
+					options.gameStart = parseInt(options.gameStart);
 				}
 
 				if(!options.levelName || !options.userId || !options.gameStart) {
@@ -121,15 +118,7 @@
 				// Everything is fine, start the game
 				$("#game-canvas").show();
 
-				var engine = new Engine();
-				var game = new MGGame(options);
-
-				engine.initializeEngine(canvas_id, 1230, 729.5, game);
-
-				var level = new MGLevel(options.levelName);
-				game.addObject("level", level);
-				game.addObject("player", new MGPlayer(options));
-				game.addObject("controls", new Controls());
+				var maze = new MazeGame(options);
 			}());
 		</script>
 	</body>

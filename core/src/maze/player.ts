@@ -16,18 +16,18 @@ class MGPlayer extends GraphicalObject
 	
 	public playerAngle: number;
 	
-	constructor(options)
+	constructor(options: MazeOptions)
 	{
 		super()
 
 		// Depends on sprite
 		this.setDimensions(32, 46);
 
-		var sessionId = parseInt(options.gameStart).toString(36 | 0).toUpperCase();
+		var sessionId = options.gameStart.toString(36 | 0).toUpperCase();
 
-		this.sink = new Sink(datasink +
+		this.sink = new Sink(options.sinkAddress +
 			"?game=MG&session=" + sessionId +
-			"&level=" + options.playerId +
+			"&level=" + options.levelName +
 			"&user=" + options.userId +
 			"&debug=false");
 	}

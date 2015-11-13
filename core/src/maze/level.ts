@@ -10,23 +10,24 @@ class MGLevel extends GameObject
 {
 	private levelName: string;
 	public levelMap: number[][];
-	private server: string;
+	
+	private options: MazeOptions;
 	
 	private widthwall: number;
 	private widthspace: number;
 	
 	bombImage: HTMLImageElement;
 	
-	constructor(levelName: string)
+	constructor(options: MazeOptions)
 	{
 		super()
-		
-		this.levelName = levelName;
-		
-		this.server = "http://maira-server.champalimaud.pt/games/backend/";
+
+		this.options = options;
+
+		this.levelName = options.levelName;
 		this.levelMap = [[3]];
 		
-		this.getLevelFromServer(levelName).then(function(level) {
+		this.getLevelFromServer(this.levelName).then(function(level) {
 			this.levelMap = level.level;
 
 			this.parent.reset();
@@ -39,11 +40,8 @@ class MGLevel extends GameObject
 	getLevelFromServer(levelName: string)
 	{
 		return new Promise(function(resolve, reject) {
-			if(typeof(this.server) == 'undefined' || !this.server)
-				reject("Server is undefined");
-
 			jQuery.ajax({
-				url: this.server + "mldb/get_level.php?name=" + levelName,
+				url: this.options.ldbAddress + "get_level.php?name=" + levelName,
 				dataType: 'json'
 			}).done(function(data) {
 				resolve(data);
@@ -67,7 +65,7 @@ class MGLevel extends GameObject
 		this.widthspace = game.widthspace;
 
 		this.bombImage = new Image();
-		this.bombImage.src = "images/bomb.png";
+		this.bombImage.src = this.options.resourceAddress + "images/bomb.png";
 
 		if(game !== undefined) {
 			var bounds = {
@@ -200,7 +198,7 @@ resetLevel(width, height)
 loadLevel(name: string): void
 {
 	jQuery.ajax({
-		url: this.server + "/get_level.php?name=" + name,
+		url: this.options.ldbAddress + "get_level.php?name=" + name,
 		dataType: 'json'
 	}).done(function(data) {
 		this.levelMap = data;
@@ -215,7 +213,7 @@ loadLevel(name: string): void
 saveLevel(name: string): void
 {
 	jQuery.ajax({
-		url:  this.server + "/set_level.php?name=" + name,
+		url:  this.options.ldbAddress + "set_level.php?name=" + name,
 		data: JSON.stringify(this.levelMap),
 		contentType: 'text/plain',
 		method: 'POST'
