@@ -11,6 +11,7 @@ class MGPlayer extends GraphicalObject
 	
 	private playerImage: HTMLImageElement;
 	
+	private options: MazeOptions;
 	public widthwall: number;
 	public widthspace: number;
 	
@@ -23,6 +24,8 @@ class MGPlayer extends GraphicalObject
 		// Depends on sprite
 		this.setDimensions(32, 46);
 
+		this.options = options;
+		
 		var sessionId = options.gameStart.toString(36 | 0).toUpperCase();
 
 		this.sink = new Sink(options.sinkAddress +
@@ -57,7 +60,7 @@ class MGPlayer extends GraphicalObject
 
 		// Load sprite
 		this.playerImage = new Image();
-		this.playerImage.src = "images/player.png";
+		this.playerImage.src = this.options.resourceAddress + "images/player.png";
 	}
 
 
