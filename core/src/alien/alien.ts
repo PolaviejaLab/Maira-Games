@@ -1,26 +1,51 @@
 
 interface AlienOptions
 {
+  canvasId?: string;
+  canvasWidth?: number;
+  canvasHeight?: number;
+  
+  levelName: string;
+  userId?: string;
+  gameId?: string;
+  
   sinkAddress?: string;
   ldbAddress?: string;
   resourceAddress?: string;
+  
+  progressBarId?: string;
+  spriteBoxId?: string;
+  
+  editMode?: boolean;
+  debugMode?: boolean;
+  
+  levelOnErrorFunction?: (error: any) => void,
+  levelOnLoadFunction?: () => void
 }
 
 
 function applyAGDefaultOptions(options: AlienOptions): AlienOptions
   {
     var defaults: AlienOptions = {
-      //"canvasId": "game-canvas",
-      //"canvasWidth": 1230,
-      //"canvasHeight": 729.5,
-      //"levelName": "example",
+      "canvasId": "game-canvas",
+      "canvasWidth": 35 * 32,
+      "canvasHeight": 13 * 32,
+      "levelName": "demo",
       
       "sinkAddress": "http://maira-server.champalimaud.pt/games/backend/sink.php",
       "ldbAddress": "http://maira-server.champalimaud.pt/games/backend/ldb/",
       "resourceAddress": "",
       
+      "progressBarId": "progress-bar",
+      "spriteBoxId": "spriteBox",
       //"gameStart": undefined,
       //"userId": undefined
+      
+      "editMode": false,
+      "debugMode": false,
+      
+      "levelOnErrorFunction": function(error) { return; },
+      "levelOnLoadFunction": function() { return; }
     };
     
     for(var key in defaults) {
@@ -88,4 +113,56 @@ function getOptionsFromQuery()
   }
 
   return options;
+}
+
+
+class AlienGame
+{
+  private engine: Engine;
+  public editor: Editor;
+  private game: AGGame; 
+  public loader: LevelLoader;
+  
+  constructor(options: AlienOptions)
+  {
+    var options: AlienOptions = applyAGDefaultOptions(options);
+    
+    this.engine = new Engine();
+    this.game = new AGGame(options);
+    
+    this.game.spriteManager.loadFromSpriteTable(spriteTable,
+      function(left, total) {
+        var element: HTMLElement;
+        element = document.getElementById(options.progressBarId);
+        
+        if(!element)
+          return;
+
+        element.style.width = (total - left) / total * 100 + "%";        
+    }).then(function() {
+      var main = this.game;
+      
+      if(options.editMode) {
+        this.editor = new Editor(this.game);
+        var spriteBox = new SpriteBox(options.spriteBoxId, this.editor, spriteTable); 
+        
+        main = this.editor;
+      }
+      
+      var height = options.canvasHeight + 64 * (options.editMode?1:0);
+      
+      this.engine.initializeEngine(options.canvasId, options.canvasWidth, height, main);
+      this.engine.debugMode = options.debugMode;
+      
+      this.loader = new LevelLoader(options, this.game);
+      
+      this.loader.loadLevel(options.levelName).then(function(response) {
+        this.game.reset();
+        
+        options.levelOnLoadFunction();
+      }.bind(this), function(error) {
+        options.levelOnErrorFunction(error);
+      });
+    }.bind(this));
+  }
 }

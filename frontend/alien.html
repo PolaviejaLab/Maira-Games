@@ -333,48 +333,24 @@
 				/**
 				 * Initialize game
 				 */
-				var engine = new Engine();
-				var game = new AGGame(options);
-
-				game.spriteManager.loadFromSpriteTable(spriteTable,
-					function(left, total) {
-						document.getElementById("progress-bar").style.width = (total-left)/total*100 + "%";
-					}).then(function() {
-						var main = game;
-
-						if(options.editMode) {
-							editor = new Editor(game);
-							var spriteBox = new SpriteBox("spriteBox", editor, spriteTable);
-
-							main = editor;
-						}
-
-						engine.initializeEngine(canvas_id, 32 * width, 32 * (height + 2 * (options.editMode?1:0)), main);
-						engine.debugMode = options.debugMode;
-
-						loader = new LevelLoader(game);
-
-
-						/**
-			 	 		 * Initialize level and player objects
-			 	 		 */
-						loader.loadLevel(options.levelName).then(function(response) {
-							game.reset();
-							$("#loading-screen").fadeOut(500, function() {
-								$("#game-canvas").fadeIn(250);
-							});
-
-							// Dump structure into PRE-element
-							// var tree = document.getElementById("tree")
-							// tree.innerHTML = "ROOT\n" + dumpStructure(game, 1);
-						}, function(error) {
-							console.log("loadLevel() failed " + error);
-
-							$("#loading-screen").fadeOut(500, function() {
-								$("#level-error").fadeIn(250);
-							});
-						});
+				options.levelOnLoadFunction = function() {
+					$("#loading-screen").fadeOut(500, function() {
+						$("#game-canvas").fadeIn(250);
 					});
+
+				}
+
+				options.levelOnErrorFunction = function() {
+					console.log("loadLevel() failed " + error);
+
+					$("#loading-screen").fadeOut(500, function() {
+						$("#level-error").fadeIn(250);
+					});
+				}
+
+				var alienGame = new AlienGame(options);
+				this.editor = alienGame.editor;
+				this.loader = alienGame.loader;
 			}());
 		</script>
 

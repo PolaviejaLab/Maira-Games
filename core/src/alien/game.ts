@@ -36,7 +36,7 @@ class AGGame extends GameObject
   public scroll: Scroll;  
   public editMode: boolean;
   
-  constructor(options)
+  constructor(options: AlienOptions)
   {
     super();
     
@@ -47,7 +47,7 @@ class AGGame extends GameObject
     this.deadzone = {w: 128};
   
     // Connection responsible for saving data on server
-    this.sink = new Sink(server + "/sink.php?game=AG" +
+    this.sink = new Sink(options.sinkAddress + "?game=AG" +
         "&session=" + options.gameId +
         "&user=" + options.userId +
         "&level=" + options.levelName +

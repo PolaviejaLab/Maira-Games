@@ -7,14 +7,21 @@
  * @class
  * @classdesc Level loading class
  */
-function LevelLoader(game)
+class LevelLoader
 {
-  this.game = game;
-
-  this.Sprite_Player = 0x0002;
-  this.Sprite_Enemy_Fly = 0x0A00;
-  this.Sprite_Enemy_Bee = 0x0A03;
-  this.Sprite_Enemy_Bat = 0x0A06;
+  private game: AGGame;
+  private Sprite_Player: number = 0x002;
+  private Sprite_Enemy_Fly: number = 0x0A00;
+  private Sprite_Enemy_Bee: number = 0x0A03;
+  private Sprite_Enemy_Bat: number = 0x0A06;
+  
+  private options: AlienOptions;
+  
+  constructor(options: AlienOptions, game: AGGame)
+  {
+    this.options = options;
+    this.game = game;
+  }
 
   /**
    * Loads the level from the list and sets up the game
@@ -22,7 +29,7 @@ function LevelLoader(game)
    *
    * @param {String} name - Name of the level to load
    */
-  this.loadLevel = function(name)
+  loadLevel(name: string): Promise<{}>
   {
     return new Promise(function(resolve, reject) {
       this.game.deleteAllObjects();
@@ -60,7 +67,7 @@ function LevelLoader(game)
   };
 
 
-  this.saveLevel = function(name)
+  saveLevel(name: string)
   {
     var data = {
         'version': 2,
@@ -92,14 +99,11 @@ function LevelLoader(game)
    *
    * @param {String} name - Name of the level to load
    */
-  this.getLevelFromServer = function(name)
+  getLevelFromServer(name: string)
   {
   	return new Promise(function(resolve, reject) {
-  		if(typeof(server) == 'undefined' || !server)
-  			reject();
-
   		jQuery.ajax({
-  			url: server + "ldb/get_level.php?name=" + name,
+  			url: this.options.ldbAddress + "get_level.php?name=" + name,
   			dataType: 'json'
   		}).done(function(data) {
 
@@ -120,14 +124,11 @@ function LevelLoader(game)
   *
   * @param {String} name - Name of the level to save
   */
-  this.saveLevelToServer = function(name, level)
+  saveLevelToServer(name: string, level)
   {
   	return new Promise(function(resolve, reject) {
-  		if(typeof(server) == 'undefined' || !server)
-  			reject();
-
   		jQuery.ajax({
-  			url: server + "ldb/set_level.php?name=" + name,
+  			url: this.options.ldbAddress + "set_level.php?name=" + name,
   			data: JSON.stringify(level),
   			contentType: 'text/plain',
   			method: 'POST'
@@ -143,7 +144,7 @@ function LevelLoader(game)
   /**
    * Set level bounds on game object
    */
-  this.setLevelBounds = function(level)
+  setLevelBounds(level)
   {
     this.game.setLevelBounds({
       x: spriteSize,

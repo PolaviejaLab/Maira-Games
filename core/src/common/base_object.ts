@@ -25,7 +25,14 @@ class GameObject
     this.properties = [];
   }
 
-
+  toArray(): any
+  {
+    return {};
+  }
+  
+  fromArray(array: any): void
+  {    
+  }
 
   /**
    * Returns the name of the present object

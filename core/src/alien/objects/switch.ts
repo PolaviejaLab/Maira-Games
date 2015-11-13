@@ -96,7 +96,7 @@ class Switch extends GraphicalObject
   /**
    * Serialize state to array
    */
-  toArray = function()
+  toArray()
   {
     return {
       'x': this.x,
