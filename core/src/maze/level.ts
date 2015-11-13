@@ -6,17 +6,21 @@
  *
  * @class
  */
-class MGLevel
+class MGLevel extends GameObject
 {
 	private levelName: string;
-	private levelMap: number[][];
+	public levelMap: number[][];
 	private server: string;
 	
 	private widthwall: number;
 	private widthspace: number;
 	
+	bombImage: HTMLImageElement;
+	
 	constructor(levelName: string)
 	{
+		super()
+		
 		this.levelName = levelName;
 		
 		this.server = "http://maira-server.champalimaud.pt/games/backend/";
@@ -56,28 +60,30 @@ class MGLevel
 	 */
 	reset()
 	{
+		var game = <MGGame> this.parent;
+		
 		// Copy wall and space width from parent
-		this.widthwall = this.parent.widthwall;
-		this.widthspace = this.parent.widthspace;
+		this.widthwall = game.widthwall;
+		this.widthspace = game.widthspace;
 
 		this.bombImage = new Image();
 		this.bombImage.src = "images/bomb.png";
 
-		if('game' in this) {
+		if(game !== undefined) {
 			var bounds = {
 					x: 0,
 					y: 0,
 					width: (this.getWidth()-1)/2 * this.widthspace +  (this.getWidth()+1)/2 * this.widthwall,
 					height: (this.getHeight()-1)/2 * this.widthspace +  (this.getHeight()+1)/2 * this.widthwall
 				};
-			this.game.setLevelBounds(bounds);
-
-			this.game.setSize(bounds.width, bounds.height);
+				
+			//game.setLevelBounds(bounds);
+			//game.setSize(bounds.width, bounds.height);
 		}
 	}
 
 
-	this.update = function(input)
+	update(input)
 	{
 	}
 
@@ -85,7 +91,7 @@ class MGLevel
 	/**
 	 * Draw entire level
 	 */
-	this.draw = function(context)
+	draw(context: CanvasRenderingContext2D)
 	{
 		for(var i = 0; i < this.levelMap.length; i++) {
 			for(var j = 0; j < this.levelMap[0].length; j++) {
@@ -121,28 +127,24 @@ class MGLevel
 			}
 		}
 	}
-}
 
 
-Level.prototype = new BaseObject();
+	getHeight(): number
+	{
+		return this.levelMap.length;
+	}
 
 
-Level.prototype.getHeight = function()
-{
-	return this.levelMap.length;
-}
-
-
-Level.prototype.getWidth = function()
-{
-	return this.levelMap[0].length;
-}
+	getWidth(): number
+	{
+		return this.levelMap[0].length;
+	}
 
 
 /**
  * Sets the sprite at a specific block
  */
-Level.prototype.setSprite = function(coords, sprite)
+setSprite(coords, sprite)
 {
 	// Check invalid coordinates
 	if(coords.x < 0 || coords.y < 0)
@@ -172,7 +174,7 @@ Level.prototype.setSprite = function(coords, sprite)
 /**
  * Clears the current level, filling it completely with air
  */
-Level.prototype.resetLevel = function(width, height)
+resetLevel(width, height)
 {
 	this.levelMap = [];
 
@@ -195,7 +197,7 @@ Level.prototype.resetLevel = function(width, height)
 /**
  * Loads the level with the given name from the server
  */
-Level.prototype.loadLevel = function(name)
+loadLevel(name: string): void
 {
 	jQuery.ajax({
 		url: this.server + "/get_level.php?name=" + name,
@@ -210,7 +212,7 @@ Level.prototype.loadLevel = function(name)
 /**
  * Save the level to the server
  */
-Level.prototype.saveLevel = function(name)
+saveLevel(name: string): void
 {
 	jQuery.ajax({
 		url:  this.server + "/set_level.php?name=" + name,
@@ -218,4 +220,5 @@ Level.prototype.saveLevel = function(name)
 		contentType: 'text/plain',
 		method: 'POST'
 	});
+}
 }

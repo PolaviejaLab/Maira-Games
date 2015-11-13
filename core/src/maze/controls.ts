@@ -5,28 +5,40 @@
  * Handles different ways to handle touch events in the maze game.
  * @class
  */
-function Controls()
+class Controls extends GameObject
 {
-  this.x = 1144;
-  this.y = 100;
+	public x: number = 0;
+	public y: number = 0;
+	
+	// Radius of control circle
+	public minRadius: number = 70;
+	public maxRadius: number = 15;
+	
+	// Position of initial touch
+	public initialTouchPosition: Point = { x: 0, y: 0 };
+	
+	// Keep track of past activity
+	public lastTouchTime: number = 0;
+	public lastMouseMoveTime: number = 0;
+	public lastKeyboardMoveTime: number = 0;
+	
+	// Repeat movement every X ms
+	public repeatInterval: number = 200;
+	
+	// Movement mode
+	public mode: string = "direction";
+	public modeWedge: boolean = true;
+	
+	// Player object
+	private player: MGPlayer;
+	
+	constructor()
+	{
+		super()
+	}
 
-  this.maxRadius = 70;
-  this.minRadius = 15;
 
-  // Position of initial touch
-	this.initialTouchPosition = {x: 0, y: 0};
-  this.lastTouchTime = 0;
-
-  this.lastMouseMoveTime = 0;
-  this.lastKeyboardMoveTime = 0;
-  this.repeatInterval = 200;
-
-  // Mouse movement mode
-	this.mode = "direction";
-	this.modeWedge = true;
-
-
-  this.reset = function()
+  reset()
   {
     this.mode = getQueryField("control");
 
@@ -36,14 +48,14 @@ function Controls()
     console.log("Using control mode: " + this.mode);
 
     this.getEngine().canvas.addEventListener("game-move", this.mousemove.bind(this));
-    this.player = this.parent.getObject("player");
+    this.player = <MGPlayer> this.parent.getObject("player");
   }
 
 
   /**
    * Handle keyboard-based movements.
    */
-  this.handleKeyboardUpdate = function(input)
+  handleKeyboardUpdate(input: Keyboard)
   {
     // In case all keys are up, reset the repeat timer
     if(!input.keys[input.KEY_LEFT] && !input.keys[input.KEY_RIGHT] &&
@@ -74,7 +86,7 @@ function Controls()
   /**
    * Move mouse using a control circle
    */
-  this.moveMouseControlCircle = function(event)
+  moveMouseControlCircle(event)
   {
     var pos = { x: event.detail.x - this.x, y: event.detail.y - this.y };
     var dist = Math.sqrt(pos.x * pos.x + pos.y * pos.y);
@@ -105,15 +117,16 @@ function Controls()
   /**
 	 * Move the player along with the (dragging) mouse movement
 	 */
-	this.moveMouseDirection = function(event)
+	moveMouseDirection(event)
 	{
 		if(event.detail.type == 'mouse' && event.detail.buttons != 1) {
 			this.lastTouchTime = 0;
 			return false;
 		}
 
-    var widthwall = this.parent.widthwall;
-    var widthspace = this.parent.widthspace;
+		var game = <MGGame> this.parent;
+    	var widthwall = game.widthwall;
+   		var widthspace = game.widthspace;
 		var width = (widthspace + widthwall);
 
 		// Compute age of last touch event
@@ -152,13 +165,14 @@ function Controls()
   /**
 	 * Move the player to the position of a click / touch
 	 */
-	this.moveMouseCoordinates = function(event)
+	moveMouseCoordinates(event)
 	{
 		if(event.detail.type == 'mouse' && event.detail.buttons != 1)
 			return false;
 
-    var widthwall = this.parent.widthwall;
-    var widthspace = this.parent.widthspace;
+		var game = <MGGame> this.parent;
+    var widthwall = game.widthwall;
+    var widthspace = game.widthspace;
 		var width = (widthspace + widthwall);
 
 		// Compute position in grid
@@ -209,7 +223,7 @@ function Controls()
 	}
 
 
-  this.update = function(input)
+  update(input)
   {
     this.handleKeyboardUpdate(input);
   }
@@ -218,7 +232,7 @@ function Controls()
   /**
 	 * Handle mouse move
 	 */
-	this.mousemove = function(event)
+	mousemove(event)
 	{
 		if(this.mode == "coord" && this.moveMouseCoordinates(event))
 			return true;
@@ -233,7 +247,7 @@ function Controls()
 	}
 
 
-  this.draw = function(context)
+  draw(context)
   {
     if(this.mode == "control") {
       context.beginPath();
@@ -254,6 +268,3 @@ function Controls()
     }
   }
 }
-
-
-Controls.prototype = new BaseObject();

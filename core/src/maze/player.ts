@@ -5,31 +5,46 @@
  * Object representing the player in the maze game
  * @class
  */
-function Player(options)
+class MGPlayer extends GraphicalObject
 {
-	// Depends on sprite
-	this.width = 32;
-	this.height = 46;
+	public sink: Sink;
+	
+	private playerImage: HTMLImageElement;
+	
+	public widthwall: number;
+	public widthspace: number;
+	
+	public playerAngle: number;
+	
+	constructor(options)
+	{
+		super()
 
-	var sessionId = parseInt(options.gameStart).toString(36 | 0).toUpperCase();
+		// Depends on sprite
+		this.setDimensions(32, 46);
 
-	this.sink = new Sink(datasink +
-		"?game=MG&session=" + sessionId +
-		"&level=" + options.playerId +
-		"&user=" + options.userId +
-		"&debug=false");
+		var sessionId = parseInt(options.gameStart).toString(36 | 0).toUpperCase();
+
+		this.sink = new Sink(datasink +
+			"?game=MG&session=" + sessionId +
+			"&level=" + options.playerId +
+			"&user=" + options.userId +
+			"&debug=false");
+	}
 
 	/**
 	 * Sets up the player object
 	 */
-	this.reset = function()
+	reset()
 	{
+		var game = <MGGame> this.parent;
+		
 		// Copy wall and space width from parent
-		this.widthwall = this.parent.widthwall;
-		this.widthspace = this.parent.widthspace;
+		this.widthwall = game.widthwall;
+		this.widthspace = game.widthspace;
 
 		// Find player start position
-		var level = this.parent.getObject("level");
+		var level = <MGLevel> this.parent.getObject("level");
 
 		for(var i = 0; i < level.levelMap.length; i++) {
 			for(var j = 0; j < level.levelMap[0].length; j++) {
@@ -50,7 +65,7 @@ function Player(options)
 	 * Handles player movement
 	 * @param {Keyboard} Object containing keyboard state
 	 */
-	this.update = function(input)
+	update(input: Keyboard)
 	{
 	}
 
@@ -60,7 +75,7 @@ function Player(options)
 	 * @param {number} Movement in X direction (left/right)
 	 * @param {number} Movement in Y direction (up/down)
 	 */
-	this.moveDirection = function(dx, dy)
+	moveDirection(dx, dy)
 	{
 		// Normalize delta
 		if(dx != 0)
@@ -78,9 +93,9 @@ function Player(options)
 	 * @param {number} Target X coordinate
 	 * @param {number} Target Y coordinate
 	 */
-	this.move = function(x, y)
+	move(x, y)
 	{
-		var level = this.parent.getObject("level");
+		var level = <MGLevel> this.parent.getObject("level");
 
 		var delta = Math.abs(this.x - x) + Math.abs(this.y - y);
 
@@ -131,7 +146,7 @@ function Player(options)
 	/**
 	 * Draw the correct sprite based on the current state of the player
 	 */
-	this.draw = function(context)
+	draw(context)
 	{
 		var x, y, w, h;
 
@@ -160,6 +175,3 @@ function Player(options)
 		context.restore();
 	}
 }
-
-
-Player.prototype = new BaseObject();

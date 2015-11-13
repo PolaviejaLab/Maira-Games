@@ -13,8 +13,10 @@
 			var server = "http://maira-server.champalimaud.pt/games/backend/";
 		</script>
 
-		<script src="../bower_components/jquery/dist/jquery.js"></script>
-		<script src="js/build/maze.js"></script>
+		<script src="bower_components/jquery/dist/jquery.js"></script>
+
+		<script src="../core/build/engine.js"></script>
+		<script src="../core/build/maze.js"></script>
 
 		<script>
 			function updateOptions()
@@ -120,13 +122,13 @@
 				$("#game-canvas").show();
 
 				var engine = new Engine();
-				var game = new Game(options);
+				var game = new MGGame(options);
 
 				engine.initializeEngine(canvas_id, 1230, 729.5, game);
 
-				var level = new Level(options.levelName);
+				var level = new MGLevel(options.levelName);
 				game.addObject("level", level);
-				game.addObject("player", new Player(options));
+				game.addObject("player", new MGPlayer(options));
 				game.addObject("controls", new Controls());
 			}());
 		</script>
