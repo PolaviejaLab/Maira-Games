@@ -1,16 +1,47 @@
 
-// Global variables
-declare var server: string;
+interface AlienOptions
+{
+  sinkAddress?: string;
+  ldbAddress?: string;
+  resourceAddress?: string;
+}
 
+
+function applyAGDefaultOptions(options: AlienOptions): AlienOptions
+  {
+    var defaults: AlienOptions = {
+      //"canvasId": "game-canvas",
+      //"canvasWidth": 1230,
+      //"canvasHeight": 729.5,
+      //"levelName": "example",
+      
+      "sinkAddress": "http://maira-server.champalimaud.pt/games/backend/sink.php",
+      "ldbAddress": "http://maira-server.champalimaud.pt/games/backend/ldb/",
+      "resourceAddress": "",
+      
+      //"gameStart": undefined,
+      //"userId": undefined
+    };
+    
+    for(var key in defaults) {
+      if(!(key in options))
+        options[key] = defaults[key];
+    }
+    
+    return options;
+  }
+  
 
 /**
  * Loads the list of levels into a form element.
  * @param {String} element <select> Element to insert levelnames into.
  * @param {String} selected Selected item.
  */
-function updateLevelSelector(element, selected)
+function updateAGLevelSelector(options: AlienOptions, element, selected)
 {
-  jQuery.ajax(server + "ldb/list_levels.php", { dataType: 'json'}).done(function(result) {
+  options = applyAGDefaultOptions(options);
+  
+  jQuery.ajax(options.ldbAddress + "list_levels.php", { dataType: 'json'}).done(function(result) {
     for(let i = 0; i < result.length; i++) {
       var list = $(element);
 

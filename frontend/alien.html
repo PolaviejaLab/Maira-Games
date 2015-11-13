@@ -305,7 +305,7 @@
 				 * Show details if one of the fields was missing
 				 */
 				if(showDetails) {
-					updateLevelSelector("#level-list", options.levelName);
+					updateLevelSelector(options, "#level-list", options.levelName);
 
 					$("nav").hide();
 					$("#loading-screen").fadeOut(500, function() {
