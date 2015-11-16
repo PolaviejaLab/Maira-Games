@@ -14,11 +14,11 @@ maze.controller('FlowController', ['$scope',
   {
     $scope.screens = [
       { 'template': 'screens/maze/identifier.html' },
-      { 'template': 'screens/maze/instructions.html' },
-      { 'template': 'screens/maze/practise_lobby.html' },
-      { 'template': 'screens/maze/practise.html' },
+      { 'template': 'screens/maze/instructions1.html' },
+      { 'template': 'screens/maze/practise.html', 'timeout': 2 },
+      { 'template': 'screens/maze/instructions2.html' },
       { 'template': 'screens/maze/level_lobby.html' },
-      { 'template': 'screens/maze/level.html' },
+      { 'template': 'screens/maze/level.html', 'timeout': 15 * 60 },
       { 'template': 'screens/maze/final.html' }
     ];
 
@@ -57,7 +57,14 @@ maze.controller('FlowController', ['$scope',
      */
     $scope.is_next_allowed = function()
     {
-      if($scope.data.participantId == '')
+      var participantId = $scope.data.participantId;
+
+      if(participantId == "" || participantId === undefined)
+        return false;
+
+      var id = participantId.substr(participantId.length - 1);
+
+      if(id <= "0" || id >= "9")
         return false;
 
       return true;
@@ -93,13 +100,7 @@ maze.controller('FlowController', ['$scope',
 maze.controller('LobbyController', ['$scope',
   function($scope)
   {
-    console.log("Starting lobby...");
-    var name = "practise";
-    if($scope.screenId == 4)
-      name = "level";
-
-    var lobby = new Lobby(
-      $scope.data.participantId + "_" + name, false);
+    var lobby = new Lobby($scope.data.participantId, false);
 
     lobby.onStart = function()
     {
@@ -122,27 +123,31 @@ maze.controller('MazeController', ['$scope',
     var options = {};
     var timerId = undefined;
 
-    // Determine timeout
-    var timeout = 0;
-    switch($scope.screenId) {
-      case 3: timeout = 60; break;
-      case 5: timeout = 15 * 60; break;
+    /**
+     * Setup time-out
+     */
+    if('timeout' in $scope.screen)
+    {
+      var timeout = $scope.screen['timeout'];
+
+      timerId = setInterval(function() {
+        if(timeout == 0) {
+          clearInterval(timerId);
+          timerId = undefined;
+
+          $scope.$apply(function() {
+            $scope.next();
+          });
+
+        } else {
+          timeout -= 1;
+        }
+      }, 1000);
     }
 
-    timerId = setInterval(function() {
-      if(timeout == 0) {
-        clearInterval(timerId);
-        timerId = undefined;
-
-        $scope.$apply(function() {
-          $scope.next();
-        });
-
-      } else {
-        timeout -= 1;
-      }
-    }, 1000);
-
+    /**
+     * Set options
+     */
     options.controlMode = "direction";
     options.userId = $scope.data.participantId;
 
@@ -165,8 +170,13 @@ maze.controller('MazeController', ['$scope',
 
     // Determine level
     switch($scope.screenId) {
-      case 3: options.levelName = "example"; break;
-      case 5: options.levelName = "level1"; break;
+      case 3:
+        options.levelName = "example";
+        break;
+      case 5:
+        options.levelName = "level" +
+          options.userId.substr(options.userId.length - 1);
+        break;
     }
 
 	  var maze = new MazeGame(options);

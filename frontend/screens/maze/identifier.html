@@ -10,7 +10,7 @@
     <br />
     <br />
     <button id="button_start"
-            ng-class="{ 'enabled': data.participantId }"
+            ng-class="{ 'enabled': is_next_allowed() }"
             ng-click="next()">Start</button>
   </div>
 </div>
