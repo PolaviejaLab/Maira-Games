@@ -125,8 +125,8 @@ maze.controller('MazeController', ['$scope',
     // Determine timeout
     var timeout = 0;
     switch($scope.screenId) {
-      case 3: timeout = 10; /*60;*/ break;
-      case 5: timeout = 10; /*15 * 60;*/ break;
+      case 3: timeout = 60; break;
+      case 5: timeout = 15 * 60; break;
     }
 
     timerId = setInterval(function() {
@@ -141,7 +141,6 @@ maze.controller('MazeController', ['$scope',
       } else {
         timeout -= 1;
       }
-      console.log(timeout);
     }, 1000);
 
     options.controlMode = "direction";
