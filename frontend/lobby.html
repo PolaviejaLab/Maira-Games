@@ -1,0 +1,46 @@
+<html ng-app="Lobby">
+  <head>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.css">
+
+    <script src="bower_components/angular/angular.js"></script>
+
+    <script src="../core/build/engine.js"></script>
+    <script src="../core/build/maze.js"></script>
+    <script src="lobby.js"></script>
+
+    <style>
+      h1 {
+        padding-bottom: 10px;
+      }
+    </style>
+  </head>
+
+  <body ng-controller="LobbyController">
+
+    <div id="wrapper">
+
+      <div class="col-xs-6">
+
+        <h1>Lobby - Maze Game</h1>
+
+        <table class="table">
+          <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Status</th>
+          </tr>
+          <tr ng-repeat="client in clients">
+            <td><input type="checkbox" ng-model="to_start[client.name]"></td>
+            <td>{{ client.name }}</td>
+            <td>{{ client.status }}</td>
+          </tr>
+        </table>
+
+        <button ng-click="startGames()">Start game for selected clients</button>
+      </div>
+    </div>
+  </body>
+</html>
