@@ -14,11 +14,12 @@ maze.controller('FlowController', ['$scope',
   {
     $scope.screens = [
       { 'template': 'screens/maze/identifier.html' },
+      { 'template': 'screens/maze/fullscreen.html' },
       { 'template': 'screens/maze/instructions1.html' },
-      { 'template': 'screens/maze/practise.html', 'timeout': 2 },
+      { 'template': 'screens/maze/practise.html', 'timeout': 2, 'type': 'practise' },
       { 'template': 'screens/maze/instructions2.html' },
       { 'template': 'screens/maze/level_lobby.html' },
-      { 'template': 'screens/maze/level.html', 'timeout': 15 * 60 },
+      { 'template': 'screens/maze/level.html', 'timeout': 15 * 60, 'type': 'actual' },
       { 'template': 'screens/maze/final.html' }
     ];
 
@@ -58,6 +59,9 @@ maze.controller('FlowController', ['$scope',
     $scope.is_next_allowed = function()
     {
       var participantId = $scope.data.participantId;
+
+      if($scope.screenId >= 1 && !$scope.data.fullScreen)
+        return false;
 
       if(participantId == "" || participantId === undefined)
         return false;
@@ -169,11 +173,11 @@ maze.controller('MazeController', ['$scope',
     }
 
     // Determine level
-    switch($scope.screenId) {
-      case 3:
+    switch($scope.screen.type) {
+      case 'practise':
         options.levelName = "example";
         break;
-      case 5:
+      case 'actual':
         options.levelName = "level" +
           options.userId.substr(options.userId.length - 1);
         break;
