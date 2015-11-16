@@ -15,8 +15,11 @@ maze.controller('FlowController', ['$scope',
     $scope.screens = [
       { 'template': 'screens/maze/identifier.html' },
       { 'template': 'screens/maze/instructions.html' },
+      { 'template': 'screens/maze/practise_lobby.html' },
       { 'template': 'screens/maze/practise.html' },
-      { 'template': 'screens/maze/level.html' }
+      { 'template': 'screens/maze/level_lobby.html' },
+      { 'template': 'screens/maze/level.html' },
+      { 'template': 'screens/maze/final.html' }
     ];
 
     // Load fields from query field
@@ -87,24 +90,62 @@ maze.controller('FlowController', ['$scope',
 ]);
 
 
+maze.controller('LobbyController', ['$scope',
+  function($scope)
+  {
+    console.log("Starting lobby...");
+    var name = "practise";
+    if($scope.screenId == 4)
+      name = "level";
+
+    var lobby = new Lobby(
+      $scope.data.participantId + "_" + name, false);
+
+    lobby.onStart = function()
+    {
+      $scope.$apply(function() {
+        $scope.next();
+      });
+    }
+
+    $scope.$on("$destroy", function() {
+      lobby.destroy();
+      delete lobby;
+    });
+  }
+]);
+
+
 maze.controller('MazeController', ['$scope',
   function($scope)
   {
-    var canvas_id = "game-canvas";
-    var engine = new Engine();
-    var game = new Game();
+    var options = {};
+    var timerId = undefined;
 
-    engine.initializeEngine(canvas_id, 1230, 729.5, game);
-
-    var gameStart = 0;
-
-    var canvas = document.getElementById(canvas_id);
-
-    // Determine level
+    // Determine timeout
+    var timeout = 0;
     switch($scope.screenId) {
-      case 2: levelName = "example"; break;
-      case 3: levelName = "level1"; break;
+      case 3: timeout = 10; /*60;*/ break;
+      case 5: timeout = 10; /*15 * 60;*/ break;
     }
+
+    timerId = setInterval(function() {
+      if(timeout == 0) {
+        clearInterval(timerId);
+        timerId = undefined;
+
+        $scope.$apply(function() {
+          $scope.next();
+        });
+
+      } else {
+        timeout -= 1;
+      }
+      console.log(timeout);
+    }, 1000);
+
+    options.controlMode = "direction";
+    options.userId = $scope.data.participantId;
 
     /**
      * Determine time of game start
@@ -112,30 +153,23 @@ maze.controller('MazeController', ['$scope',
      *  - If the key does not exist, generate a new one and pushState
      */
     var key = "gameStart" + $scope.screenId;
-    var gameStart = getQueryField(key);
+    options.gameStart = getQueryField(key);
 
-    if(gameStart === undefined) {
-      gameStart = Math.floor(Date.now() / 1000);
+    if(options.gameStart === undefined) {
+      options.gameStart = Math.floor(Date.now() / 1000);
       var update = {};
-      update[key] = gameStart;
+      update[key] = options.gameStart;
 
       var href = updateQueryString(update);
       window.history.pushState(null, null, href);
     }
 
-    /**
-     * Start game
-     */
-    var options = {
-      gameStart: gameStart,
-      levelName: levelName,
-      userId: $scope.data.participantId,
-      controlMode: "direction"
-    };
+    // Determine level
+    switch($scope.screenId) {
+      case 3: options.levelName = "example"; break;
+      case 5: options.levelName = "level1"; break;
+    }
 
-    var level = new Level(levelName);
-    game.addObject("level", level);
-    game.addObject("player", new Player(options));
-    game.addObject("controls", new Controls());
+	  var maze = new MazeGame(options);
   }
 ]);
