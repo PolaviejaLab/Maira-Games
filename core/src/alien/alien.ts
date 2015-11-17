@@ -5,6 +5,9 @@ interface AlienOptions
   canvasWidth?: number;
   canvasHeight?: number;
   
+  overlay?: HTMLElement;
+  killSpan?: HTMLElement;
+  
   levelName: string;
   userId?: string;
   gameId?: string;
@@ -123,17 +126,67 @@ class AlienGame
   private game: AGGame; 
   public loader: LevelLoader;
   
-  constructor(options: AlienOptions)
+  private options: AlienOptions;
+  
+  
+  setupOverlay()
   {
-    var options: AlienOptions = applyAGDefaultOptions(options);
+    // Overlay is already present
+    if(this.options.overlay !== undefined)
+      return;
+    
+    this.options.overlay = document.createElement("div");
+    var element: HTMLElement = document.getElementById(this.options.canvasId);
+    element.parentElement.appendChild(this.options.overlay);
+        
+    var style = this.options.overlay.style;
+    
+    style.display = "table";
+    style.position = "absolute";
+    style.margin = "0px";
+    style.padding = "0px";
+    style.top = "0px";
+    style.fontSize = "20pt";
+    style.verticalAlign = "middle";
+    style.textAlign = "center";
+    style.height = this.options.canvasHeight + "px";
+    style.width = this.options.canvasWidth + "px";
+    
+    $(this.options.overlay).hide();
+  }
+  
+  
+  setupKillSpan()
+  {
+    if(this.options.killSpan !== undefined)
+      return;
+    
+    this.options.killSpan = document.createElement("span");    
+    this.options.overlay.appendChild(this.options.killSpan);
+
+    var style = this.options.killSpan.style;
+    
+    style.display = "table-cell";
+    style.verticalAlign = "middle";    
+  }
+  
+  
+  constructor(opxtions: AlienOptions)
+  {
+    this.options = applyAGDefaultOptions(opxtions);
+
+    if(!this.options.editMode) {    
+      this.setupOverlay();
+      this.setupKillSpan();
+    }
     
     this.engine = new Engine();
-    this.game = new AGGame(options);
+    this.game = new AGGame(this.options);
     
     this.game.spriteManager.loadFromSpriteTable(spriteTable,
       function(left, total) {
         var element: HTMLElement;
-        element = document.getElementById(options.progressBarId);
+        element = document.getElementById(this.options.progressBarId);
         
         if(!element)
           return;
@@ -142,27 +195,42 @@ class AlienGame
     }).then(function() {
       var main = this.game;
       
-      if(options.editMode) {
+      if(this.options.editMode) {
         this.editor = new Editor(this.game);
-        var spriteBox = new SpriteBox(options.spriteBoxId, this.editor, spriteTable); 
+        var spriteBox = new SpriteBox(this.options.spriteBoxId, this.editor, spriteTable); 
         
         main = this.editor;
       }
       
-      var height = options.canvasHeight + 64 * (options.editMode?1:0);
+      var height = this.options.canvasHeight + 64 * (this.options.editMode?1:0);
       
-      this.engine.initializeEngine(options.canvasId, options.canvasWidth, height, main);
-      this.engine.debugMode = options.debugMode;
+      this.engine.initializeEngine(this.options.canvasId, this.options.canvasWidth, height, main);
+      this.engine.debugMode = this.options.debugMode;
       
-      this.loader = new LevelLoader(options, this.game);
+      this.loader = new LevelLoader(this.options, this.game);
       
-      this.loader.loadLevel(options.levelName).then(function(response) {
+      this.loader.loadLevel(this.options.levelName).then(function(response) {
         this.game.reset();
         
-        options.levelOnLoadFunction();
+        if(this.options.levelOnLoadFunction)
+          this.options.levelOnLoadFunction();
       }.bind(this), function(error) {
-        options.levelOnErrorFunction(error);
+        if(this.options.levelOnErrorFunction)
+          this.options.levelOnErrorFunction(error);
       });
-    }.bind(this));
+    }.bind(this));    
   }
+  
+  loadLevel(name: string): Promise<{}>
+  {
+    this.loader = new LevelLoader(this.options, this.game);
+    
+    return this.loader.loadLevel(name);
+  }
+  
+  saveLevel(name: string): Promise<{}>
+  {
+    return this.loader.saveLevel(name);
+  }
+  
 }

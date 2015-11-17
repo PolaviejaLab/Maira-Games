@@ -222,7 +222,7 @@ class Enemy extends GraphicalObject
     if(this.alive && collision) {
       if(collision.normal.y < 0 || player_went_past) {
         if(this.aggressionLevel != 0)
-          player.kill("enemy");
+          player.kill("enemy", this.sprite);
       } else {
         if(this.killable) {
           this.alive = false;

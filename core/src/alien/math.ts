@@ -5,7 +5,7 @@
  * Returns the distance to and type of the ground object
  * directly underneath the player
  */
-function findGround(player, level)
+function findGround(player: AGPlayer, level: AGLevel)
 {
 	var x_left = Math.floor(player.x / 32);
 	var x_right = Math.floor((player.x + player.width) / 32);
@@ -27,6 +27,25 @@ function findGround(player, level)
 }
 
 
+interface CollisionXYInterface
+{
+	type: string;
+	normal: number;
+}
+
+
+interface CollisionObject
+{
+	type?: string;
+	sprite?: number;
+	
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
+
+
 /**
  * Checks whether the X coordaintes of two objects collide
  *
@@ -34,13 +53,13 @@ function findGround(player, level)
  * @param {Object} objectB - Second object
  * @return {false|Object} False if they do not collide
  */
-function collisionCheckX(objectA, objectB): any
+function collisionCheckX(objectA: CollisionObject, objectB: CollisionObject): CollisionXYInterface
 {
 	var gapXA = objectA.x - (objectB.x + objectB.width);
 	var gapXB = objectB.x - (objectA.x + objectA.width);
 
 	if(gapXA >= 0 || gapXB >= 0)
-		return false;
+		return undefined;
 
 	return {
 		type: objectB.type,
@@ -56,18 +75,26 @@ function collisionCheckX(objectA, objectB): any
  * @param {Object} objectB - Second object
  * @return {false|Object} False if they do not collide
  */
-function collisionCheckY(objectA, objectB): any
+function collisionCheckY(objectA: CollisionObject, objectB: CollisionObject): CollisionXYInterface
 {
 	var gapYA = objectA.y - (objectB.y + objectB.height);
 	var gapYB = objectB.y - (objectA.y + objectA.height);
 
 	if(gapYA >= 0 || gapYB >= 0)
-		return false;
+		return undefined;
 
 	return {
 		type: objectB.type,
 		normal: (gapYA < gapYB)?gapYB:-gapYA
 	};
+}
+
+
+interface CollisionInterface
+{
+	type: string;
+	normal: { x: number; y: number; };
+	axis: string;
 }
 
 
@@ -79,7 +106,7 @@ function collisionCheckY(objectA, objectB): any
  * @param {Object} objectB - Second object
  * @return {false|Object} False if they do not collide
  */
-function collisionCheck(objectA, objectB): any
+function collisionCheck(objectA: CollisionObject, objectB: CollisionObject): CollisionInterface
 {
 	if(objectA === undefined || objectB === undefined) {
 		console.trace();
@@ -89,8 +116,8 @@ function collisionCheck(objectA, objectB): any
 	var collideX = collisionCheckX(objectA, objectB);
 	var collideY = collisionCheckY(objectA, objectB);
 
-	if(collideX === false || collideY === false)
-		return false;
+	if(collideX === undefined || collideY === undefined)
+		return undefined;
 
 	var ci = {
 		type: objectB.type,
@@ -105,7 +132,7 @@ function collisionCheck(objectA, objectB): any
 }
 
 
-function detectCollisionArray(objectA, objectsB, callback, offset)
+function detectCollisionArray(objectA: CollisionObject, objectsB: CollisionObject[], callback, offset?: Point)
 {
 	var box;
 
@@ -126,11 +153,7 @@ function detectCollisionArray(objectA, objectsB, callback, offset)
 		if(!ci)
 			continue;
 
-		if(typeof ci.type == "object") {
-			detectCollisionArray(objectA, ci.type, callback, box);
-		} else {
-			callback(ci);
-		}
+		callback(ci);
 	}
 }
 
@@ -138,7 +161,7 @@ function detectCollisionArray(objectA, objectsB, callback, offset)
 /**
  * Checks whether a given position is within a box
  */
-function inBox(x, y, box)
+function inBox(x: number, y: number, box: Box): boolean
 {
 	if(x >= box.x && x <= box.x + box.width &&
 		 y >= box.y && y <= box.y + box.height)
@@ -155,7 +178,7 @@ function inBox(x, y, box)
  * @param {number} max - Maximum value
  * @returns {number} Clamped value
  */
-function clamp(value, min, max)
+function clamp(value: number, min: number, max: number): number
 {
 	return Math.min(max, Math.max(min, value));
 }
@@ -164,7 +187,7 @@ function clamp(value, min, max)
 /**
  * Returns the sign of the number, 1 for positive, -1 for negative.
  */
-function sign(number)
+function sign(number: number): number
 {
 	return (number >= 0)?1:-1;
 }
@@ -173,7 +196,7 @@ function sign(number)
 /**
  * Linear interpolation
  */
-function lerp(from, to, t)
+function lerp(from: number, to: number, t: number): number
 {
 	return from + (to - from) * t;
 }

@@ -147,8 +147,8 @@ class Frog extends GraphicalObject
     }
 
     // Kill frog when jumped on it from the top
-    if(collision.axis == 'y' && this.player.velY > 4)
-      this.alive = false;
+    //if(collision.axis == 'y' && this.player.velY > 4)
+    //  this.alive = false;
   }
 
 

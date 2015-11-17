@@ -82,7 +82,7 @@ class Platform extends GraphicalObject
   }
 
 
-  setControlGroup(controlGroup)
+  setControlGroup(controlGroup: number): void
   {
     var engine = this.getEngine();
 
@@ -90,7 +90,7 @@ class Platform extends GraphicalObject
       if(engine !== undefined)
         engine.removeActorFromControlGroup(this.controlGroup, this);
 
-      this.controlGroup = parseInt(controlGroup);
+      this.controlGroup = controlGroup;
 
       if(engine !== undefined) {
         engine.addActorToControlGroup(this.controlGroup, this);
@@ -99,7 +99,7 @@ class Platform extends GraphicalObject
   }
 
 
-  setState(state)
+  setState(state): void
   {
     var startingPosition = this.getStartingPosition();
      
@@ -149,7 +149,7 @@ class Platform extends GraphicalObject
     this.setStartingPosition(array.x, array.y);
     this.setBaseSprite(array.sprite);
     this.setDirection(array.direction);
-    this.setControlGroup(array.controlGroup);
+    this.setControlGroup(parseInt(array.controlGroup));
     this.setDistance(array.distance);
     this.type = array.type;
   }
@@ -158,7 +158,7 @@ class Platform extends GraphicalObject
   /**
    * Setups the enemy at the start of the game
    */
-  reset()
+  reset(): void
   {
     this.resetPosition();
 
@@ -186,7 +186,7 @@ class Platform extends GraphicalObject
   }
 
 
-  updateCollider = function()
+  updateCollider = function(): void
   {
     var collider = <Collider> this.getComponent("collider");
 
@@ -203,7 +203,7 @@ class Platform extends GraphicalObject
    * Set base sprite for rock
    * @param {number} sprite - ID of base sprite
    */
-  setBaseSprite(sprite)
+  setBaseSprite(sprite: number): void
   {
     this.sprite = sprite;
   }
@@ -212,7 +212,7 @@ class Platform extends GraphicalObject
   /**
    * Updates the rock
    */
-  update(keyboard)
+  update(keyboard: Keyboard): void
   {
     var collision = collisionCheck({x: this.x, y: this.y, width: this.width, height:16}, this.player);
 
@@ -226,7 +226,7 @@ class Platform extends GraphicalObject
    *
    * @param {Context} context - Context to draw to
    */
-  draw(context)
+  draw(context: CanvasRenderingContext2D): void
   {
     var game = <AGGame> this.parent;
     var box = { 'x': this.x, 'y': this.y, 'width': 32, 'height': 32 };

@@ -167,7 +167,7 @@ class Door extends GraphicalObject
    */
   update(keyboard: Keyboard)
   {
-    var collision = collisionCheck({x: this.x, y: this.y, width: this.width, height:16}, this.player);
+    var collision = collisionCheck({x: this.x, y: this.y, width: this.width, height: 16}, this.player);
 
     if(collision && this.direction == 'S') {
       // Find target

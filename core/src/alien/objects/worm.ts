@@ -163,7 +163,7 @@ class Worm extends GraphicalObject
 
     if(collision && this.alive) {
       if(collisionCheckY(this, player)) {
-        player.kill("worm/" + this.getName());
+        player.kill("worm/" + this.getName(), this.sprite);
       } else {
         var distanceY = this.y + this.height - player.y;
 

@@ -9,6 +9,22 @@ interface GroundInterface
 }
 
 
+interface CombinedSensorInterface
+{
+	min: SensorInterface;
+	max: SensorInterface;
+}
+
+
+interface PermittedActionsInterface
+{
+	walk_on_water: boolean;
+	fly: boolean;
+	walk_upside_down: boolean;
+	super_jump: boolean;
+}
+
+
 /**
  * Implements player in alien girl game, it is reponsible for input/movement,
  * kinematics, visual representation, collision handling.
@@ -39,13 +55,16 @@ class AGPlayer extends GraphicalObject
 	public velY: number;
 	
 	private speed: number;
-	private speedDefault: number;
-	private speedSnow: number;
+	private speedDefault: number = 3.5;
+	private speedSnow: number = 7.0;
+	
+	private jumpMultiplier: number = 7.0;
+	private superJumpMultiplier: number = 10.0;
 	
 	private friction: number;
-	private frictionDefault: number;
-	private frictionDown: number;
-	private frictionSnow: number;
+	private frictionDefault: number = 0.8;
+	private frictionDown: number = 0.7;
+	private frictionSnow: number = 0.999;
 	
 	private slideAccelerationSnow: number;
 	
@@ -80,7 +99,7 @@ class AGPlayer extends GraphicalObject
 	* these objects are used to test for collisions
 	* the level itself is always tested against.
 	*/
-	buildCollisionObjectList()
+	buildCollisionObjectList(): void
 	{
 		this.collisionObjects = [];
 	
@@ -101,7 +120,7 @@ class AGPlayer extends GraphicalObject
 	}
 	
 	
-	reset()
+	reset(): void
 	{
 		this.engine = this.getEngine();
 	
@@ -114,10 +133,8 @@ class AGPlayer extends GraphicalObject
 		this.velX = 0;
 		this.velY = 0;
 	
-		this.speed = 3.5;
-		this.speedDefault = 3.5;
-		this.speedSnow = 7.0;
-	
+		this.speed = this.speedDefault;
+
 		this.jumping = false;
 		this.super_jumping = false;
 		this.grounded = false;
@@ -129,11 +146,6 @@ class AGPlayer extends GraphicalObject
 		this.friction = this.frictionDefault;
 	
 		this.slideAccelerationSnow = 0.5;
-	
-		// Friction values for
-		this.frictionDefault = 0.8;		// normal ground
-		this.frictionDown = 0.7;			// when down is pressed
-		this.frictionSnow = 0.999;			// when on snow
 	
 		this.scale = 1;
 		this.alive = true;
@@ -152,7 +164,7 @@ class AGPlayer extends GraphicalObject
 	/**
 	* Creates a collider
 	*/
-	setupCollider()
+	setupCollider(): void
 	{
 		// Create collider
 		var collider = new Collider();
@@ -179,7 +191,7 @@ class AGPlayer extends GraphicalObject
 		return {
 			'x': this.x,
 			'y': this.y,
-				'type': 'player'
+			'type': 'player'
 		};
 	}
 	
@@ -187,7 +199,7 @@ class AGPlayer extends GraphicalObject
 	/**
 	* Unserialize state from array
 	*/
-	fromArray(array)
+	fromArray(array): void
 	{
 		this.setStartingPosition(array.x, array.y);
 	}
@@ -198,8 +210,11 @@ class AGPlayer extends GraphicalObject
 	*
 	* @param {String} Reason the player was killed
 	*/
-	kill(reason)
+	kill(reason: string, sprite?: number): void
 	{
+		var game = <AGGame> this.parent;
+		game.died(reason, sprite);
+	
 		if(this.alive) {
 			this.events.push("DIED_" + reason.toUpperCase());
 			this.sendPosition();
@@ -212,7 +227,7 @@ class AGPlayer extends GraphicalObject
 	/**
 	* Send position to server
 	*/
-	sendPosition()
+	sendPosition(): void
 	{
 		var game: AGGame = <AGGame> this.parent;
 		game.sink.appendData({
@@ -226,7 +241,7 @@ class AGPlayer extends GraphicalObject
 	}
 	
 	
-	getPermittedActions()
+	getPermittedActions(): PermittedActionsInterface
 	{
 		var x = Math.floor(this.x / 32);
 		var y = Math.floor(this.y / 32);
@@ -257,14 +272,14 @@ class AGPlayer extends GraphicalObject
 			if(!this.jumping && this.grounded) {
 				this.jumping = true;
 				this.grounded = false;
-				this.velY = -sign(this.gravity) * this.speedDefault * 2;
+				this.velY = -sign(this.gravity) * this.jumpMultiplier;
 			}
 		}
 	
 		if(input.keys[input.KEY_UP]) {
 			if(this.jumping && permitted.super_jump && !this.super_jumping) {
 				this.super_jumping = true;
-				this.velY = -sign(this.gravity) * this.speedDefault * 2;
+				this.velY = -sign(this.gravity) * this.superJumpMultiplier;
 			}
 		}
 	
@@ -330,19 +345,19 @@ class AGPlayer extends GraphicalObject
 	/**
 	* Takes a list of sensors and returns the closest and furthest sensors
 	*/
-	combineSensors(sensors)
+	combineSensors(sensors: SensorInterface[]): CombinedSensorInterface
 	{
-		var minSensor: any = false;
-		var maxSensor: any = false;
+		var minSensor: SensorInterface = undefined;
+		var maxSensor: SensorInterface = undefined;
 	
 		for(var i = 0; i < sensors.length; i++) {
 			if(!sensors[i] || !sensors[i].type)
 				continue;
 	
-			if(!minSensor || sensors[i].y < minSensor.y)
+			if(minSensor === undefined || sensors[i].y < minSensor.y)
 				minSensor = sensors[i];
 	
-			if(!maxSensor || sensors[i].y > maxSensor.y)
+			if(maxSensor === undefined || sensors[i].y > maxSensor.y)
 				maxSensor = sensors[i];
 		}
 	
@@ -350,15 +365,18 @@ class AGPlayer extends GraphicalObject
 	}
 	
 	
-	sensorCallback(hit)
+	sensorCallback(hit: SensorInterface): SensorInterface
 	{
+		var game = <AGGame> this.parent;
+		
 		if(hit.type == "exit") {
 			if(hit.dx == 0 && !this.finished) {
-				this.events.push("EXIT");
+				this.events.push("EXIT");				
 				this.finished = true;
+				game.finished();
 			}
 	
-			return false;
+			return undefined;
 		}
 	
 		return hit;
@@ -367,7 +385,8 @@ class AGPlayer extends GraphicalObject
 	
 	/**************************************************************/
 	
-	hitGround(sprite, type)
+
+	hitGround(sprite: number, type: string): void
 	{
 		this.velY = 0;
 		this.grounded = true;
@@ -379,7 +398,7 @@ class AGPlayer extends GraphicalObject
 	}
 	
 	
-	collideVerticalDown(level)
+	collideVerticalDown(level: AGLevel): void
 	{
 		var permitted = this.getPermittedActions();
 	
@@ -411,12 +430,12 @@ class AGPlayer extends GraphicalObject
 			// If on water and we cannot walk on water, sink and die.
 			if(on_water && (!permitted.walk_on_water || Math.abs(this.velX) <= 0.1 || this.jumping)) {
 				if(combined.min.dy < -8)
-					this.kill("water");
+					this.kill("water", combined.min.sprite);
 				return;
 			}
 	
 			if(on_water_body && (!permitted.walk_on_water || Math.abs(this.velX) <= 0.1 || this.jumping)) {
-				this.kill("water");
+				this.kill("water", combined.min.sprite);
 				return;
 			}
 	
@@ -433,7 +452,7 @@ class AGPlayer extends GraphicalObject
 	}
 	
 	
-	collideVerticalUp(level)
+	collideVerticalUp(level: AGLevel): void
 	{
 		var dirY = -Math.sign(this.gravity);
 		var oriY = this.y + 10 + (dirY == 1?1:0) * (this.height - 20);
@@ -458,7 +477,7 @@ class AGPlayer extends GraphicalObject
 	}
 	
 	
-	collideHorizontal(level)
+	collideHorizontal(level: AGLevel): void
 	{
 		// To the right
 		var hit = level.sensor({
@@ -497,7 +516,7 @@ class AGPlayer extends GraphicalObject
 	/**
 	* Update kinematics
 	*/
-	updateKinematics()
+	updateKinematics(): void
 	{
 		if(!this.alive && !this.finished)
 			return;
@@ -506,7 +525,7 @@ class AGPlayer extends GraphicalObject
 		var oriY = this.y;
 	
 		var permitted = this.getPermittedActions();
-		var level = this.parent.getObject("level");
+		var level = <AGLevel> this.parent.getObject("level");
 	
 		this.velX *= this.friction;
 		this.velY += this.gravity;
@@ -526,7 +545,7 @@ class AGPlayer extends GraphicalObject
 	
 			var collision = collisionCheck(this, box);
 
-			if(collision === false)
+			if(collision === undefined)
 				continue;
 	
 			if(collision.axis == 'x') {
@@ -546,7 +565,7 @@ class AGPlayer extends GraphicalObject
 	}
 	
 	
-	findTeleportDestination(x, y)
+	findTeleportDestination(x: number, y: number): Point
 	{
 		var level: AGLevel = <AGLevel> this.parent.getObject('level');
 		var map = level.levelMap;
@@ -558,13 +577,15 @@ class AGPlayer extends GraphicalObject
 				}
 			}
 		}
+		
+		return undefined;
 	}
 	
 	
 	/**
 	* Handle input and kinematics
 	*/
-	update(input: Keyboard)
+	update(input: Keyboard): void
 	{
 		if(!this.finished)
 			this.handleInput(input);
@@ -587,7 +608,7 @@ class AGPlayer extends GraphicalObject
 	/**
 	* Function to handle simple sprite animations
 	*/
-	animate(base, frames)
+	animate(base, frames): number
 	{
 		if(this.animationBase != base) {
 			this.animationStart = this.engine.getTimestamp();
@@ -599,47 +620,12 @@ class AGPlayer extends GraphicalObject
 		return Math.floor(1 + deltaT % frames);
 	}
 	
-	
-	/**
-	* Draws the dead message to the context
-	*
-	* @private
-	* @param {Context} context - Context to draw to
-	*/
-	drawDeadMessage(context)
-	{
-		context.save();
-		context.setTransform(1, 0, 0, 1, 0, 0);
-		context.font = 'bold 20px Arial';
-		context.textAlign = 'center';
-		context.fillText("Oops, you died...", this.engine.getWidth() / 2, this.engine.getHeight() / 2);
-		context.restore();
-	}
-	
-	
-	/**
-	* Draws the finished message to the context
-	*
-	* @private
-	* @param {Context} context - Context to draw to
-	*/
-	drawFinishedMessage(context)
-	{
-		context.save();
-	
-		context.setTransform(1, 0, 0, 1, 0, 0);
-		context.font = 'bold 20px Arial';
-		context.textAlign = 'center';
-		context.fillText("Congratulations, you have finished the game...", this.engine.getWidth() / 2, this.engine.getHeight() / 2);
-	
-		context.restore();
-	}
-	
+		
 	
 	/**
 	* Draw the correct sprite based on the current state of the player
 	*/
-	draw(context)
+	draw(context: CanvasRenderingContext2D): void
 	{
 		var sprite: number;
 		var game: AGGame = <AGGame> this.parent;
@@ -649,14 +635,7 @@ class AGPlayer extends GraphicalObject
 			this.scale = lerp(this.scale, sign(this.gravity) == -1?-1:1, 0.5);
 		} else {
 			this.scale = lerp(this.scale, 0, 0.05);
-		}
-	
-		// Show messages on death and finishing the level
-		if(!this.alive)
-			this.drawDeadMessage(context);
-	
-		if(this.finished)
-			this.drawFinishedMessage(context);
+		}	
 	
 		// Determine whether to use running or walking sprite...
 		if(Math.abs(this.velX) > 0.3) {

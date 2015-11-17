@@ -20,6 +20,7 @@
 		<script src="../core/build/alien.js"></script>
 
 		<script>
+		 	var alienGame = null;
 			var editor = null;
 			var loader = null;
 
@@ -33,8 +34,7 @@
 
 				$("#status").html("Loading level, please wait...");
 
-				var loader = new LevelLoader(editor.game);
-				loader.loadLevel(level_name)
+				alienGame.loadLevel(level_name)
 					.then(
 						function() { $("#status").html("Level loaded..."); },
 						function(error) { $("#status").html("Error loading level (" + level_name + "): " + error); }
@@ -51,7 +51,7 @@
 
 				$("#status").html("Saving level, please wait...");
 
-				loader.saveLevel(level_name)
+				alienGame.saveLevel(level_name)
 					.then(
 						function() { $("#status").html("Level saved..."); },
 						function(error) { $("#status").html("Error saving level: " + error); }
@@ -305,7 +305,7 @@
 				 * Show details if one of the fields was missing
 				 */
 				if(showDetails) {
-					updateLevelSelector(options, "#level-list", options.levelName);
+					updateAGLevelSelector(options, "#level-list", options.levelName);
 
 					$("nav").hide();
 					$("#loading-screen").fadeOut(500, function() {
@@ -348,7 +348,7 @@
 					});
 				}
 
-				var alienGame = new AlienGame(options);
+				alienGame = new AlienGame(options);
 				this.editor = alienGame.editor;
 				this.loader = alienGame.loader;
 			}());

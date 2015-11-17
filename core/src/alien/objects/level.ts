@@ -3,7 +3,8 @@
 
 var spriteSize = 32;
 
-interface AGLevelDynamicLevelGeometry {
+interface AGLevelDynamicLevelGeometry 
+{
 	x: number;
 	y: number;
 	frameCount: number;
@@ -11,7 +12,24 @@ interface AGLevelDynamicLevelGeometry {
 }
 
 
-interface AGLevelLines {
+interface SensorInterface
+{
+	type: string;
+	sprite?: number;
+	
+	x?: number;
+	y?: number;
+	
+	sx: number;
+	sy: number;
+	
+	dx?: number;
+	dy?: number;
+}
+
+
+interface AGLevelLines 
+{
 	a: any;
 	b: any;
 	color: any;
@@ -107,7 +125,7 @@ class AGLevel extends GameObject
 	* the distance is greater than _length_ or the function
 	* _func_ returns a value.
 	 */
-	sensor(origin: Point, dir: Point, length: number, func)
+	sensor(origin: Point, dir: Point, length: number, func: (hit: SensorInterface) => SensorInterface): SensorInterface
 	{
 		if(isNaN(origin.x) || isNaN(origin.y)) {
 			console.trace();
@@ -135,7 +153,7 @@ class AGLevel extends GameObject
 			// Half blocks
 			if(hit.type == 'topHalf') {
 				if(dir.y < 0) hit.y -= 14;
-				if(dir.x != 0 && origin.y - hit.sy * spriteSize > (18/32)*spriteSize) return false;
+				if(dir.x != 0 && origin.y - hit.sy * spriteSize > (18/32)*spriteSize) return undefined;
 			}
 
 			// Ramp down
@@ -156,7 +174,7 @@ class AGLevel extends GameObject
 
 			// Do not report hits in opposite direction
 			if(dir.x != 0 && dir.x * hit.dx <= 0)
-				return false;
+				return undefined;
 
 			// Invoke callback
 			hit = func(hit);
@@ -185,7 +203,7 @@ class AGLevel extends GameObject
 	 * the distance is greater than _length_ or the function
 	 * _func_ returns a value.
 	 */
-	spriteSensor(origin, dir, length, func)
+	spriteSensor(origin: Point, dir: Point, length: number, func: (hit: SensorInterface) => SensorInterface): SensorInterface
 	{
 		if(isNaN(origin.x) || isNaN(origin.y))
 			throw new Error("SpriteSensor: Origin is set to NaN (" + origin.x + ", " + origin.y + ")");
@@ -195,7 +213,8 @@ class AGLevel extends GameObject
 
 		for(var i = 0; i < Math.ceil(length); i++)
 		{
-			var l: any = {
+			var l: SensorInterface = {
+				type: '',
 				sx: origin.x + dir.x * i,
 				sy: origin.y + dir.y * i
 			};
@@ -225,13 +244,13 @@ class AGLevel extends GameObject
 				var hit = func(l);
 
 				// If we hit something, return it, otherwise continue
-				if(hit && hit.type !== false)
+				if(hit && hit.type !== undefined)
 					return hit;
 			}
 		}
 
 		// We did not hit anything, return false
-		return { type: false };
+		return undefined;
 	};
 
 
