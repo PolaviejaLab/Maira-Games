@@ -197,7 +197,7 @@
 							<!--<label>Height:</label> <input type="text" style="width: 50px;">-->
 						</div>
 
-						<button id="align" onclick="editor.alignSelected();">Align with grid</button>
+						<button id="align" onclick="alienGame.editor.alignSelected();">Align with grid</button>
 
 					</div></td>
 				</tr>
@@ -349,8 +349,8 @@
 				}
 
 				alienGame = new AlienGame(options);
-				this.editor = alienGame.editor;
-				this.loader = alienGame.loader;
+				editor = alienGame.editor;
+				loader = alienGame.loader;
 			}());
 		</script>
 
