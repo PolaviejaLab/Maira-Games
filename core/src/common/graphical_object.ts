@@ -22,6 +22,8 @@ class GraphicalObject extends GameObject
 	{
 		this.baseX = x;
 		this.baseY = y;
+    
+    this.resetPosition();
 	}
   
   
