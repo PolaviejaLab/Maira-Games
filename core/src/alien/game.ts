@@ -41,9 +41,8 @@ class AGGame extends GameObject
   private numRepeats: number = 3;
   private repeatCount: number = 0;
   
-  private killMessageTimeOutId: number;
-  private killMessage: string = undefined;
-  
+  private messageTimeOutId: number;
+ 
   
   constructor(options: AlienOptions)
   {
@@ -67,6 +66,12 @@ class AGGame extends GameObject
   }
 
 
+  /**
+   * Returns message to be shown when the player gets killed
+   * 
+   * @param {string} reason - Reason the player was killed
+   * @param {number} sprite - Sprite that caused the player to be killed
+   */
   getKillMessage(reason: string, sprite: number): string
   {
     var levelName = this.options.levelName;
@@ -116,7 +121,14 @@ class AGGame extends GameObject
   }
 
 
-  parseKey(key: string): string
+  /**
+   * Returns the element to display instead of a key
+   * 
+   * Keys:
+   *  0x#### -> sprite number
+   *  ↑↓A..Za..z -> keyboard key
+   */
+  getElementForKey(key: string): string
   {
     if(key[0] == "0" && key[1] == "x") {
       for(var i = 0; i < spriteTable.length; i++) {
@@ -136,17 +148,23 @@ class AGGame extends GameObject
 
     if(key == "↑")
       key = "arrow-up-icon";
-    if(key == "↓")
+    else if(key == "↓")
       key = "arrow-down-icon";
-    if(key >= "a" && key <= "z")
+    else if(key >= "a" && key <= "z")
       key = "letter-" + key + "-icon";       
-    if(key >= "A" && key <= "Z")
+    else if(key >= "A" && key <= "Z")
       key = "letter-uppercase-" + key + "-icon";      
     
     return "<img style=\"width: 42px\" src=\"tiles/keys/" + key + ".png\">";
   }
 
 
+  /**
+   * Replace keys in message with HTML elements
+   * 
+   * @param {string} message - Original message
+   * @return {string} Transformed message
+   */
   transformMessage(message: string): string
   {
     var inTag: boolean = false;
@@ -158,7 +176,7 @@ class AGGame extends GameObject
         key = "";
         inTag = true;
       } else if(inTag && message[i] == "]") {
-        output += this.parseKey(key);
+        output += this.getElementForKey(key);
         inTag = false;
       } else if(inTag) {
         key += message[i];
@@ -171,6 +189,27 @@ class AGGame extends GameObject
   }
 
 
+  showMessage(message: string, duration?: number): void
+  {
+    if(duration === undefined)
+      duration = 2000;
+       
+    // Clear previous time-out
+    if(this.messageTimeOutId)
+      clearTimeout(this.messageTimeOutId);
+
+    $(this.options.overlay).fadeIn(500);       
+       
+    // Set kill message
+    this.options.messageSpan.innerHTML = message;
+
+    // Set timer to remove kill message
+    this.messageTimeOutId = setTimeout(function() {
+      $(this.options.overlay).fadeOut(500);   
+    }.bind(this), 2000);      
+  }
+
+
   /**
    * Called when the player has died
    * 
@@ -179,23 +218,9 @@ class AGGame extends GameObject
    */
   died(reason: string, sprite: number): void
   {
-    // Get kill message
-    this.killMessage = this.transformMessage( 
-      this.getKillMessage(reason, sprite));
-       
-    // Clear previous time-out
-    if(this.killMessageTimeOutId)
-      clearTimeout(this.killMessageTimeOutId);
-
-    $(this.options.overlay).fadeIn(500);       
-       
-    // Set kill message
-    this.options.killSpan.innerHTML = this.killMessage;
-
-    // Set timer to remove kill message
-    this.killMessageTimeOutId = setTimeout(function() {
-      $(this.options.overlay).fadeOut(500);   
-    }.bind(this), 2000);
+    this.showMessage(
+      this.transformMessage( 
+        this.getKillMessage(reason, sprite)));
   }
   
   
@@ -207,9 +232,20 @@ class AGGame extends GameObject
     this.repeatCount += 1;
     
     if(this.repeatCount < this.numRepeats) {
-      // Draw finish message... wait... restart
+      var repeatsLeft = this.numRepeats - this.repeatCount;
+      this.showMessage("You finished the game, now repeat it " + repeatsLeft + " more times");
+  
+      setTimeout(function() {
+        this.reset();
+      }.bind(this), 1000);      
     } else {
-      // Draw final message 
+      this.showMessage("You finished the game three times, congratulations!");
+      $("#" + this.options.canvasId).fadeOut(2000);
+      
+      setTimeout(function() {
+        if(this.options.gameFinishedFunction)
+          this.options.gameFinishedFunction();
+      }.bind(this), 2000);
     }
   }
   
@@ -231,31 +267,6 @@ class AGGame extends GameObject
   };
   
   
-  drawKilledMessage(context: CanvasRenderingContext2D): void
-  {
-
-  }
-  
-
-	/**
-	* Draws the finished message to the context
-	*
-	* @private
-	* @param {Context} context - Context to draw to
-	*/
-	drawFinishedMessage(context: CanvasRenderingContext2D): void
-	{
-		context.save();
-	
-		context.setTransform(1, 0, 0, 1, 0, 0);
-		context.font = 'bold 20px Arial';
-		context.textAlign = 'center';
-		context.fillText("Congratulations, you have finished the game...", this.engine.getWidth() / 2, this.engine.getHeight() / 2);
-
-		context.restore();
-	}
-  
-  
   draw(context: CanvasRenderingContext2D): void
   {
     if(!this.engine)
@@ -271,11 +282,6 @@ class AGGame extends GameObject
     context.translate(-this.scroll.x, -this.scroll.y);
  
     this.drawChildren(context);
-    
-    if(this.killMessage !== undefined) {
-      // Write kill message
-      this.drawKilledMessage(context);
-    }
   };
   
   

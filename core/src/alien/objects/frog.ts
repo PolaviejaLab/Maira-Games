@@ -18,6 +18,10 @@ class Frog extends GraphicalObject
   public player: AGPlayer;
   public worms: Worm[];
   
+  
+  /**
+   * Setup a frog
+   */
   constructor()
   {
     super();
@@ -145,10 +149,6 @@ class Frog extends GraphicalObject
       if(collision.axis == 'x' && Math.abs(collision.normal.x) < 5)
         this.x += collision.normal.x;
     }
-
-    // Kill frog when jumped on it from the top
-    //if(collision.axis == 'y' && this.player.velY > 4)
-    //  this.alive = false;
   }
 
 

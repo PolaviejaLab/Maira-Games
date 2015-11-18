@@ -6,7 +6,7 @@ interface AlienOptions
   canvasHeight?: number;
   
   overlay?: HTMLElement;
-  killSpan?: HTMLElement;
+  messageSpan?: HTMLElement;
   
   levelName: string;
   userId?: string;
@@ -23,7 +23,9 @@ interface AlienOptions
   debugMode?: boolean;
   
   levelOnErrorFunction?: (error: any) => void,
-  levelOnLoadFunction?: () => void
+  levelOnLoadFunction?: () => void,
+  
+  gameFinishedFunction?: () => void
 }
 
 
@@ -156,15 +158,15 @@ class AlienGame
   }
   
   
-  setupKillSpan()
+  setupMessageSpan()
   {
-    if(this.options.killSpan !== undefined)
+    if(this.options.messageSpan !== undefined)
       return;
     
-    this.options.killSpan = document.createElement("span");    
-    this.options.overlay.appendChild(this.options.killSpan);
+    this.options.messageSpan = document.createElement("span");    
+    this.options.overlay.appendChild(this.options.messageSpan);
 
-    var style = this.options.killSpan.style;
+    var style = this.options.messageSpan.style;
     
     style.display = "table-cell";
     style.verticalAlign = "middle";    
@@ -177,7 +179,7 @@ class AlienGame
 
     if(!this.options.editMode) {    
       this.setupOverlay();
-      this.setupKillSpan();
+      this.setupMessageSpan();
     }
     
     this.engine = new Engine();
