@@ -190,10 +190,7 @@ class AGGame extends GameObject
 
 
   showMessage(message: string, duration?: number): void
-  {
-    if(duration === undefined)
-      duration = 2000;
-       
+  {      
     // Clear previous time-out
     if(this.messageTimeOutId)
       clearTimeout(this.messageTimeOutId);
@@ -206,7 +203,7 @@ class AGGame extends GameObject
     // Set timer to remove kill message
     this.messageTimeOutId = setTimeout(function() {
       $(this.options.overlay).fadeOut(500);   
-    }.bind(this), 2000);      
+    }.bind(this), this.options.messageDuration);      
   }
 
 
@@ -237,15 +234,15 @@ class AGGame extends GameObject
   
       setTimeout(function() {
         this.reset();
-      }.bind(this), 1000);      
+      }.bind(this), this.options.messageDuration);      
     } else {
       this.showMessage("You finished the game three times, congratulations!");
-      $("#" + this.options.canvasId).fadeOut(2000);
+      $("#" + this.options.canvasId).fadeOut(this.options.messageDuration);
       
       setTimeout(function() {
         if(this.options.gameFinishedFunction)
           this.options.gameFinishedFunction();
-      }.bind(this), 2000);
+      }.bind(this), this.options.messageDuration);
     }
   }
   

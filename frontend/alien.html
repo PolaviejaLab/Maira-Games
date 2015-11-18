@@ -190,7 +190,7 @@
 					<td>
 						<canvas id="game-canvas" class="center-block"></canvas>
 					</td>
-					<td><div class="options" style="width: 150px">
+					<td id="options"><div class="options" style="width: 150px">
 						<span id="header">Options</span>
 
 						<div id="options">
@@ -354,10 +354,17 @@
 			}());
 		</script>
 
-		<p class="text-center">
+		<p class="text-center" id="acknowledgments">
 			<small>
 				Using graphics by <a href="http://www.kenney.nl">Kenney</a> and creek23
 			</small>
 		</p>
+
+		<script>
+			// Remove acknowledgements after 3 seconds.
+			setTimeout(function() {
+				$("#acknowledgments").fadeOut(1000);
+			}, 2000);
+		</script>
 	</body>
 </html>

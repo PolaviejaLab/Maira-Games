@@ -22,6 +22,8 @@ interface AlienOptions
   editMode?: boolean;
   debugMode?: boolean;
   
+  messageDuration?: number;
+  
   levelOnErrorFunction?: (error: any) => void,
   levelOnLoadFunction?: () => void,
   
@@ -40,6 +42,8 @@ function applyAGDefaultOptions(options: AlienOptions): AlienOptions
       "sinkAddress": "http://maira-server.champalimaud.pt/games/backend/sink.php",
       "ldbAddress": "http://maira-server.champalimaud.pt/games/backend/ldb/",
       "resourceAddress": "",
+      
+      "messageDuration": 2500,
       
       "progressBarId": "progress-bar",
       "spriteBoxId": "spriteBox",
@@ -143,15 +147,15 @@ class AlienGame
         
     var style = this.options.overlay.style;
     
-    style.display = "table";
-    style.position = "absolute";
+    style.display = "block";
+    //style.position = "absolute";
     style.margin = "0px";
     style.padding = "0px";
     style.top = "0px";
     style.fontSize = "20pt";
     style.verticalAlign = "middle";
     style.textAlign = "center";
-    style.height = this.options.canvasHeight + "px";
+    //style.height = this.options.canvasHeight + "px";
     style.width = this.options.canvasWidth + "px";
     
     $(this.options.overlay).hide();
@@ -168,7 +172,7 @@ class AlienGame
 
     var style = this.options.messageSpan.style;
     
-    style.display = "table-cell";
+    style.display = "block";
     style.verticalAlign = "middle";    
   }
   
