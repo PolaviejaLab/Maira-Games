@@ -190,7 +190,11 @@ class AlienGame
     this.game = new AGGame(this.options);
     
     this.game.spriteManager.loadFromSpriteTable(spriteTable,
-      function(left, total) {
+      /**
+       * Update progress bar after every sprite
+       */
+      function(left, total) 
+      {
         var element: HTMLElement;
         element = document.getElementById(this.options.progressBarId);
         
@@ -198,32 +202,54 @@ class AlienGame
           return;
 
         element.style.width = (total - left) / total * 100 + "%";        
-    }).then(function() {
-      var main = this.game;
-      
-      if(this.options.editMode) {
-        this.editor = new Editor(this.game);
-        var spriteBox = new SpriteBox(this.options.spriteBoxId, this.editor, spriteTable); 
+      }.bind(this)
+    ).then(
+      /**
+       * Setup game after sprites have been loaded
+       */
+      function() 
+      {
+        var main = this.game;
         
-        main = this.editor;
-      }
-      
-      var height = this.options.canvasHeight + 64 * (this.options.editMode?1:0);
-      
-      this.engine.initializeEngine(this.options.canvasId, this.options.canvasWidth, height, main);
-      this.engine.debugMode = this.options.debugMode;
-      
-      this.loader = new LevelLoader(this.options, this.game);
-      
-      this.loader.loadLevel(this.options.levelName).then(function(response) {
-        this.game.reset();
+        /**
+         * Setup editor and sprite list
+         */
+        if(this.options.editMode) {
+          this.editor = new Editor(this.game);
+          var spriteBox = new SpriteBox(this.options.spriteBoxId, this.editor, spriteTable); 
+          
+          main = this.editor;
+        }
         
-        if(this.options.levelOnLoadFunction)
-          this.options.levelOnLoadFunction();
-      }.bind(this), function(error) {
+        /**
+         * Initialize engine
+         */
+        var height = this.options.canvasHeight + 64 * (this.options.editMode?1:0);
+        
+        this.engine.initializeEngine(this.options.canvasId, this.options.canvasWidth, height, main);
+        this.engine.debugMode = this.options.debugMode;
+        
+        console.log("Options", this.options);
+        
+        /**
+         * Load level
+         */
+        this.loader = new LevelLoader(this.options, this.game);
+        
+        this.loader.loadLevel(this.options.levelName).then(function(response) {
+          this.game.reset();
+          
+          if(this.options.levelOnLoadFunction)
+            this.options.levelOnLoadFunction();
+      }.bind(this), 
+      
+      /**
+       * Error
+       */
+      function(error) {
         if(this.options.levelOnErrorFunction)
           this.options.levelOnErrorFunction(error);
-      });
+      }.bind(this));
     }.bind(this));    
   }
   

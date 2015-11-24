@@ -50,7 +50,7 @@ class AGGame extends GameObject
     
     this.options = options;
     this.levelBounds = {x: 0, y: 0, width: 32, height: 32 };
-    this.spriteManager = new SpriteManager();
+    this.spriteManager = new SpriteManager(options);
     //this.engine = false;
     this.scroll = {x: 0, y: 0};
     this.deadzone = {w: 128};

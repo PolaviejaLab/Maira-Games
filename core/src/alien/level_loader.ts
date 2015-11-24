@@ -33,8 +33,13 @@ class LevelLoader
   {
     return new Promise(function(resolve, reject) {
       this.game.deleteAllObjects();
+      console.log("-----");
       this.getLevelFromServer(name).then(
-        function(data) {
+        /** 
+         * Got level back from server
+         */
+        function(data) 
+        {
           var level = new AGLevel(data.level);
 
           this.setLevelBounds(level);
@@ -59,10 +64,14 @@ class LevelLoader
 
           resolve();
         }.bind(this),
+        
+        /**
+         * Loading of the level failed
+         */
         function(error) {
           console.log("LevelLoader.loadLevel failed: " + error);
           reject(error);
-        });
+        }.bind(this));
       }.bind(this));
   };
 
@@ -106,7 +115,6 @@ class LevelLoader
   			url: this.options.ldbAddress + "get_level.php?name=" + name,
   			dataType: 'json'
   		}).done(function(data) {
-
         if($.isArray(data))
           data = upgradeLevelVersion1(data);
 
@@ -115,7 +123,7 @@ class LevelLoader
         console.log("LevelLoader.getLevelFromServer() failed " + response);
   			reject(response.responseText);
   		});
-  	});
+  	}.bind(this));
   };
 
 

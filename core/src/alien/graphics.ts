@@ -8,9 +8,10 @@
  * @class
  * @classdesc Manages sprites in the alien girl game.
  */
-function SpriteManager()
+function SpriteManager(options)
 {
 	this.sprites = {};
+	this.options = options;
 	var imageMap = {};
 
 	/**
@@ -59,7 +60,7 @@ function SpriteManager()
 }
 
 
-SpriteManager.prototype.getFrameCount = function(sprite)
+SpriteManager.prototype.getFrameCount = function(sprite): number
 {
 	if(!(sprite in this.sprites))
 		return;
@@ -74,7 +75,7 @@ SpriteManager.prototype.getFrameCount = function(sprite)
  * @param {number} sprite - Number of the sprite.
  * @returns {number} Width in pixels.
  */
-SpriteManager.prototype.getWidth = function(sprite)
+SpriteManager.prototype.getWidth = function(sprite): number
 {
 	if(!(sprite in this.sprites))
 		return;
@@ -91,7 +92,7 @@ SpriteManager.prototype.getWidth = function(sprite)
  * @param {number} sprite - Number of the sprite.
  * @returns {number} Height in pixels.
  */
-SpriteManager.prototype.getHeight = function(sprite)
+SpriteManager.prototype.getHeight = function(sprite): number
 {
 	if(!(sprite in this.sprites))
 		return;
@@ -147,7 +148,9 @@ SpriteManager.prototype.loadFromSpriteTable = function(spriteTable, update)
 			// For animated sprites, create array with one image per frame
 			if('frames' in spriteTable[i]) {
 				for(var j = 1; j <= spriteTable[i]['frames']; j++) {
-					this.loadImage(key, j - 1, 'tiles/' + spriteTable[i]['src'] + "_" + j + '.png').then(
+					var url = this.options.resourceAddress + "tiles/" + spriteTable[i]['src'] + "_" + j + '.png';
+					
+					this.loadImage(key, j - 1, url).then(
 						function() {
 							images_left--;
 							if(images_left == 0)
@@ -161,7 +164,8 @@ SpriteManager.prototype.loadFromSpriteTable = function(spriteTable, update)
 			}
 
 			// For other sprites, create a 1-frame animation
-			this.loadImage(key, 0, 'tiles/' + spriteTable[i]['src'] + '.png').then(
+			var url = this.options.resourceAddress + 'tiles/' + spriteTable[i]['src'] + '.png' 
+			this.loadImage(key, 0, url).then(
 				function() {
 					images_left--;
 					if(images_left == 0)

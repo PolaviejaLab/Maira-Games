@@ -24,6 +24,7 @@
 			var editor = null;
 			var loader = null;
 
+
 			function load() {
 				var level_name = $("#level-name").val();
 
@@ -40,6 +41,7 @@
 						function(error) { $("#status").html("Error loading level (" + level_name + "): " + error); }
 					);
 			}
+
 
 			function save() {
 				var level_name = $("#level-name").val();
@@ -190,7 +192,7 @@
 					<td>
 						<canvas id="game-canvas" class="center-block"></canvas>
 					</td>
-					<td id="options"><div class="options" style="width: 150px">
+					<td id="options_container"><div class="options" style="width: 150px">
 						<span id="header">Options</span>
 
 						<div id="options">
@@ -326,7 +328,7 @@
 				 */
 				if(!options.editMode) {
 					$("nav").hide();
-					$("#options").hide();
+					$("#options_container").hide();
 				}
 
 
