@@ -80,7 +80,13 @@ class AGGame extends GameObject
      * Parse levelName, it has the format:
      *   Level_#TaskID#_#Single/Group##Number#
      */
-    var parts = levelName.split("_");    
+    var parts = levelName.split("_");
+    
+    if(parts.length != 2) {
+      console.log("Level name does not conform to standards");
+      return DiedMessages.default;
+    }
+    
     var taskId = parseInt(parts[1]);
     var singleGroup = parts[2][0];
     
